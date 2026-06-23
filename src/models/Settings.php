@@ -26,9 +26,14 @@ class Settings extends Model
     public $imageFieldHandle = 'popupImage';
     public $ctaUrlFieldHandle = 'popupCtaUrl';
     public $ctaLabelFieldHandle = 'popupCtaLabel';
+    public $cancelLabelFieldHandle = 'popupCancelLabel';
     public $defaultVariant = 'center';
+    public $randomizeVariants = false;
     public $ctaLabelDefault = 'Learn more';
+    public $cancelLabelDefault = 'No thanks';
     public $ctaTarget = '_self';
+    public $buttonColor = '#2563eb';
+    public $cancelButtonColor = '#6b7280';
     public $delaySeconds = 0;
     public $cookieDurationDays = 30;
     public $cookieNamePrefix = 'craft_popup_promoter_closed';
@@ -53,7 +58,7 @@ class Settings extends Model
     {
         $rules = parent::defineRules();
 
-        $rules[] = [['enabled', 'autoInject', 'closeOnEsc', 'closeOnBackdrop'], 'boolean'];
+        $rules[] = [['enabled', 'autoInject', 'closeOnEsc', 'closeOnBackdrop', 'randomizeVariants'], 'boolean'];
         $rules[] = [[
             'sectionHandle',
             'titleFieldHandle',
@@ -61,11 +66,16 @@ class Settings extends Model
             'imageFieldHandle',
             'ctaUrlFieldHandle',
             'ctaLabelFieldHandle',
+            'cancelLabelFieldHandle',
             'defaultVariant',
             'ctaLabelDefault',
+            'cancelLabelDefault',
             'ctaTarget',
+            'buttonColor',
+            'cancelButtonColor',
             'cookieNamePrefix',
         ], 'string'];
+        $rules[] = [['buttonColor', 'cancelButtonColor'], 'match', 'pattern' => '/^#[0-9a-fA-F]{6}$/'];
         $rules[] = [['delaySeconds'], 'integer', 'min' => 0, 'max' => 86400];
         $rules[] = [['cookieDurationDays'], 'integer', 'min' => 0, 'max' => 3650];
         $rules[] = [['defaultVariant'], 'in', 'range' => array_keys(self::VARIANTS)];

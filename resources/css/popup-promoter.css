@@ -203,26 +203,44 @@
   line-height: 1.55;
 }
 
-.cpp-cta {
+.cpp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.cpp-cta,
+.cpp-cancel {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  margin-top: 6px;
   padding: 0 18px;
   color: #ffffff;
   font-size: 16px;
   font-weight: 700;
   line-height: 1.2;
   text-decoration: none;
-  background: var(--cpp-accent);
+  border: 0;
   border-radius: 8px;
+  cursor: pointer;
+}
+
+.cpp-cta {
+  background: var(--cpp-button-color, var(--cpp-accent));
+}
+
+.cpp-cancel {
+  background: var(--cpp-cancel-button-color, #6b7280);
 }
 
 .cpp-cta:hover,
-.cpp-cta:focus-visible {
+.cpp-cta:focus-visible,
+.cpp-cancel:hover,
+.cpp-cancel:focus-visible {
   color: #ffffff;
-  background: var(--cpp-accent-hover);
+  filter: brightness(0.92);
 }
 
 @media (max-width: 640px) {

@@ -2,7 +2,7 @@
 
 Popup Promoter is a Craft CMS 4 and Craft CMS 5 plugin for showing promotional modal popups from entries.
 
-It can use an existing section and field setup, or create a default `Popups` section with fields for description, image, call to action URL, and call to action label.
+It can use an existing section and field setup, or create a default `Popups` section with fields for description, image, call to action URL, call to action label, and cancel button label.
 
 ## Requirements
 
@@ -43,6 +43,8 @@ Open the plugin settings in the control panel and choose the entry section and f
 
 Field mapping dropdowns show the custom fields available on the selected popup section. Use the test modal button to preview a random live entry with the current mappings directly from the settings page.
 
+The call to action label and cancel button text can both be mapped from entry fields, with fallback text configured in plugin settings. Button colors can be configured independently for the primary call to action and cancel button.
+
 Use the **Create default section + fields** button to create:
 
 - `popups` section
@@ -50,6 +52,7 @@ Use the **Create default section + fields** button to create:
 - `popupImage` assets field
 - `popupCtaUrl` plain text field
 - `popupCtaLabel` plain text field
+- `popupCancelLabel` plain text field
 
 The same setup can be run from the command line:
 
@@ -78,6 +81,8 @@ The frontend is a Vue 3 component powered by `vue-final-modal`. It supports thes
 - Left drawer
 - Right drawer
 - Corner modal
+
+You can either choose one default variant or enable randomized variants to mix the display style automatically on each popup render.
 
 Frontend assets are injected automatically by default. To control placement yourself, disable automatic injection and add this to your layout:
 

@@ -30,7 +30,7 @@
     <div class="heading">
         <label>Default content model</label>
         <div class="instructions">
-            <p>Create a Popups section with description, image, and call to action fields, then map these settings automatically.</p>
+            <p>Create a Popups section with description, image, call to action, and cancel button label fields, then map these settings automatically.</p>
         </div>
     </div>
     <button type="button" class="btn" data-cpp-install-defaults>Create default section + fields</button>
@@ -87,6 +87,21 @@
 }) }}
 
 {{ forms.selectField({
+    label: 'Cancel button text field',
+    name: 'cancelLabelFieldHandle',
+    value: settings.cancelLabelFieldHandle,
+    options: fields,
+    errors: settings.getErrors('cancelLabelFieldHandle')
+}) }}
+
+{{ forms.textField({
+    label: 'Fallback cancel button text',
+    name: 'cancelLabelDefault',
+    value: settings.cancelLabelDefault,
+    errors: settings.getErrors('cancelLabelDefault')
+}) }}
+
+{{ forms.selectField({
     label: 'Call to action target',
     name: 'ctaTarget',
     value: settings.ctaTarget,
@@ -97,6 +112,22 @@
     errors: settings.getErrors('ctaTarget')
 }) }}
 
+{{ forms.textField({
+    label: 'Call to action button color',
+    name: 'buttonColor',
+    value: settings.buttonColor,
+    type: 'color',
+    errors: settings.getErrors('buttonColor')
+}) }}
+
+{{ forms.textField({
+    label: 'Cancel button color',
+    name: 'cancelButtonColor',
+    value: settings.cancelButtonColor,
+    type: 'color',
+    errors: settings.getErrors('cancelButtonColor')
+}) }}
+
 <hr>
 
 {{ forms.selectField({
@@ -105,6 +136,14 @@
     value: settings.defaultVariant,
     options: variants,
     errors: settings.getErrors('defaultVariant')
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Randomize variants',
+    instructions: 'When enabled, each popup render randomly chooses one of the available variants.',
+    name: 'randomizeVariants',
+    on: settings.randomizeVariants,
+    errors: settings.getErrors('randomizeVariants')
 }) }}
 
 {{ forms.textField({
@@ -172,7 +211,10 @@
                 <p class="cpp-test-kicker">Promoted</p>
                 <h2 id="cpp-test-title" class="cpp-test-title" data-cpp-test-title></h2>
                 <p class="cpp-test-description" data-cpp-test-description></p>
-                <button class="cpp-test-cta" type="button" data-cpp-test-cta></button>
+                <div class="cpp-test-actions">
+                    <button class="cpp-test-cta" type="button" data-cpp-test-cta></button>
+                    <button class="cpp-test-cancel" type="button" data-cpp-test-cancel></button>
+                </div>
             </div>
         </article>
     </div>
@@ -371,28 +413,44 @@
     line-height: 1.55;
 }
 
-.cpp-test-cta {
+.cpp-test-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.cpp-test-cta,
+.cpp-test-cancel {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 44px;
-    margin-top: 6px;
     padding: 0 18px;
     color: #fff;
     font-size: 16px;
     font-weight: 700;
     line-height: 1.2;
     text-decoration: none;
-    background: #2563eb;
     border: 0;
     border-radius: 8px;
     cursor: pointer;
 }
 
+.cpp-test-cta {
+    background: var(--cpp-test-button-color, #2563eb);
+}
+
+.cpp-test-cancel {
+    background: var(--cpp-test-cancel-button-color, #6b7280);
+}
+
 .cpp-test-cta:hover,
-.cpp-test-cta:focus {
+.cpp-test-cta:focus,
+.cpp-test-cancel:hover,
+.cpp-test-cancel:focus {
     color: #fff;
-    background: #1d4ed8;
+    filter: brightness(0.92);
 }
 
 @media (max-width: 640px) {
@@ -432,7 +490,8 @@
         'descriptionFieldHandle',
         'imageFieldHandle',
         'ctaUrlFieldHandle',
-        'ctaLabelFieldHandle'
+        'ctaLabelFieldHandle',
+        'cancelLabelFieldHandle'
     ];
 
     const getNamedInput = (name) => document.querySelector(`[name="${name}"]`) || document.querySelector(`[name$="[${name}]"]`);
@@ -515,8 +574,10 @@
 
     const testButton = document.querySelector('[data-cpp-test-modal]');
     const testOverlay = document.querySelector('[data-cpp-test-overlay]');
+    const testCard = document.querySelector('.cpp-test-card');
     const testClose = document.querySelector('[data-cpp-test-close]');
     const testCta = document.querySelector('[data-cpp-test-cta]');
+    const testCancel = document.querySelector('[data-cpp-test-cancel]');
     const testTitle = document.querySelector('[data-cpp-test-title]');
     const testDescription = document.querySelector('[data-cpp-test-description]');
     const testImage = document.querySelector('[data-cpp-test-image]');
@@ -531,10 +592,15 @@
         'imageFieldHandle',
         'ctaUrlFieldHandle',
         'ctaLabelFieldHandle',
+        'cancelLabelFieldHandle',
         'defaultVariant',
+        'randomizeVariants',
         'delaySeconds',
         'ctaLabelDefault',
+        'cancelLabelDefault',
         'ctaTarget',
+        'buttonColor',
+        'cancelButtonColor',
         'cookieDurationDays',
         'cookieNamePrefix',
         'closeOnEsc',
@@ -579,6 +645,11 @@
 
         testOverlay.dataset.variant = popup.variant || 'center';
 
+        if (testCard) {
+            testCard.style.setProperty('--cpp-test-button-color', popup.buttonColor || '#2563eb');
+            testCard.style.setProperty('--cpp-test-cancel-button-color', popup.cancelButtonColor || '#6b7280');
+        }
+
         if (testTitle) {
             testTitle.textContent = popup.title || 'Untitled popup';
         }
@@ -604,6 +675,11 @@
         if (testCta) {
             testCta.textContent = popup.cta ? popup.cta.label : '';
             testCta.hidden = !popup.cta;
+        }
+
+        if (testCancel) {
+            testCancel.textContent = popup.cancelLabel || '';
+            testCancel.hidden = !popup.cancelLabel;
         }
 
         testOverlay.hidden = false;
@@ -647,6 +723,10 @@
 
     if (testClose) {
         testClose.addEventListener('click', closeTestModal);
+    }
+
+    if (testCancel) {
+        testCancel.addEventListener('click', closeTestModal);
     }
 
     if (testOverlay) {

@@ -19,6 +19,10 @@ const titleId = computed(() => (popup.value ? `craft-popup-promoter-title-${popu
 const modalClass = computed(() => ['cpp-modal', `cpp-modal--${variant.value}`]);
 const contentClass = computed(() => ['cpp-content', `cpp-content--${variant.value}`]);
 const hasImage = computed(() => Boolean(popup.value?.image?.url));
+const buttonStyles = computed(() => ({
+  '--cpp-button-color': popup.value?.buttonColor || '#2563eb',
+  '--cpp-cancel-button-color': popup.value?.cancelButtonColor || '#6b7280',
+}));
 
 onMounted(async () => {
   if (loading.value) {
@@ -111,7 +115,7 @@ function rememberDismissal() {
     :click-to-close="popup.closeOnBackdrop"
     :esc-to-close="popup.closeOnEsc"
   >
-    <article class="cpp-card" role="dialog" aria-modal="true" :aria-labelledby="titleId">
+    <article class="cpp-card" role="dialog" aria-modal="true" :aria-labelledby="titleId" :style="buttonStyles">
       <button class="cpp-close" type="button" aria-label="Close popup" @click="closeModal">
         &times;
       </button>
@@ -124,16 +128,21 @@ function rememberDismissal() {
         <p class="cpp-kicker">Promoted</p>
         <h2 :id="titleId" class="cpp-title">{{ popup.title }}</h2>
         <p v-if="popup.description" class="cpp-description">{{ popup.description }}</p>
-        <a
-          v-if="popup.cta"
-          class="cpp-cta"
-          :href="popup.cta.url"
-          :target="popup.cta.target"
-          :rel="popup.cta.target === '_blank' ? 'noopener noreferrer' : null"
-          @click="rememberDismissal"
-        >
-          {{ popup.cta.label }}
-        </a>
+        <div class="cpp-actions">
+          <a
+            v-if="popup.cta"
+            class="cpp-cta"
+            :href="popup.cta.url"
+            :target="popup.cta.target"
+            :rel="popup.cta.target === '_blank' ? 'noopener noreferrer' : null"
+            @click="rememberDismissal"
+          >
+            {{ popup.cta.label }}
+          </a>
+          <button v-if="popup.cancelLabel" class="cpp-cancel" type="button" @click="closeModal">
+            {{ popup.cancelLabel }}
+          </button>
+        </div>
       </div>
     </article>
   </VueFinalModal>

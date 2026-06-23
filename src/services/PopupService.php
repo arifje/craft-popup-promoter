@@ -108,6 +108,7 @@ class PopupService extends Component
         $image = $this->imagePayload($entry, $settings);
         $ctaUrl = $this->urlFieldValue($entry, $settings->ctaUrlFieldHandle);
         $ctaLabel = $this->stringFieldValue($entry, $settings->ctaLabelFieldHandle) ?: $settings->ctaLabelDefault;
+        $cancelLabel = $this->stringFieldValue($entry, $settings->cancelLabelFieldHandle) ?: $settings->cancelLabelDefault;
         $variant = $this->variantForSettings($settings);
 
         return [
@@ -121,7 +122,10 @@ class PopupService extends Component
                 'label' => $ctaLabel,
                 'target' => $settings->ctaTarget ?: '_self',
             ] : null,
+            'cancelLabel' => $cancelLabel,
             'variant' => $variant,
+            'buttonColor' => $this->colorValue($settings->buttonColor, '#2563eb'),
+            'cancelButtonColor' => $this->colorValue($settings->cancelButtonColor, '#6b7280'),
             'delayMs' => max(0, (int)$settings->delaySeconds) * 1000,
             'cookieName' => $this->cookieName($entry, $settings),
             'cookieDurationDays' => (int)$settings->cookieDurationDays,
@@ -192,9 +196,22 @@ class PopupService extends Component
 
     private function variantForSettings(Settings $settings): string
     {
+        if ($settings->randomizeVariants) {
+            $variants = array_keys(Settings::VARIANTS);
+
+            return $variants[array_rand($variants)];
+        }
+
         $variant = $settings->defaultVariant ?: 'center';
 
         return array_key_exists($variant, Settings::VARIANTS) ? $variant : 'center';
+    }
+
+    private function colorValue(?string $value, string $fallback): string
+    {
+        $value = trim((string)$value);
+
+        return preg_match('/^#[0-9a-fA-F]{6}$/', $value) ? $value : $fallback;
     }
 
     private function imagePayload(Entry $entry, Settings $settings): ?array
@@ -323,7 +340,7 @@ class PopupService extends Component
             }
         }
 
-        foreach (['enabled', 'autoInject', 'closeOnEsc', 'closeOnBackdrop'] as $key) {
+        foreach (['enabled', 'autoInject', 'closeOnEsc', 'closeOnBackdrop', 'randomizeVariants'] as $key) {
             $settings->$key = filter_var($settings->$key, FILTER_VALIDATE_BOOLEAN);
         }
 
@@ -344,9 +361,14 @@ class PopupService extends Component
             'imageFieldHandle',
             'ctaUrlFieldHandle',
             'ctaLabelFieldHandle',
+            'cancelLabelFieldHandle',
             'defaultVariant',
+            'randomizeVariants',
             'ctaLabelDefault',
+            'cancelLabelDefault',
             'ctaTarget',
+            'buttonColor',
+            'cancelButtonColor',
             'delaySeconds',
             'cookieDurationDays',
             'cookieNamePrefix',
