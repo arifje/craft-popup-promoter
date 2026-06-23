@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Popup Promoter</title>
+  <desc id="desc">A promotional modal card with an image, call to action, and spotlight badge.</desc>
+  <rect width="512" height="512" rx="96" fill="#111827"/>
+  <path fill="#2563eb" d="M72 130c0-32 26-58 58-58h252c32 0 58 26 58 58v252c0 32-26 58-58 58H130c-32 0-58-26-58-58V130Z"/>
+  <path fill="#0f766e" d="M122 96h268c15 0 26 12 26 26v268c0 15-11 26-26 26H122c-14 0-26-11-26-26V122c0-14 12-26 26-26Z" opacity=".75"/>
+  <path fill="#fff" d="M112 156c0-25 20-45 45-45h198c25 0 45 20 45 45v206c0 25-20 45-45 45H157c-25 0-45-20-45-45V156Z"/>
+  <path fill="#e5e7eb" d="M112 156c0-25 20-45 45-45h198c25 0 45 20 45 45v58H112v-58Z"/>
+  <circle cx="154" cy="162" r="13" fill="#ef4444"/>
+  <circle cx="193" cy="162" r="13" fill="#f59e0b"/>
+  <circle cx="232" cy="162" r="13" fill="#10b981"/>
+  <path fill="#111827" d="M156 248c0-10 8-18 18-18h164c10 0 18 8 18 18s-8 18-18 18H174c-10 0-18-8-18-18Zm0 62c0-10 8-18 18-18h116c10 0 18 8 18 18s-8 18-18 18H174c-10 0-18-8-18-18Z"/>
+  <path fill="#2563eb" d="M156 354c0-13 11-24 24-24h86c13 0 24 11 24 24s-11 24-24 24h-86c-13 0-24-11-24-24Z"/>
+  <path fill="#facc15" d="m367 68 16 45 48 3-37 30 12 47-40-26-41 26 13-47-37-30 48-3 18-45Z"/>
+  <path fill="#fff7ed" d="m366 96 8 23 25 2-19 15 6 24-20-13-21 13 6-24-19-15 25-2 9-23Z"/>
+  <path fill="#111827" d="M376 248c35 0 64 29 64 64s-29 64-64 64-64-29-64-64 29-64 64-64Z" opacity=".14"/>
+  <path fill="#facc15" d="M377 226c42 0 76 34 76 76s-34 76-76 76-76-34-76-76 34-76 76-76Z"/>
+  <path fill="#111827" d="M356 289v-28l62 25v32l-62 25v-28l-28-1v-24l28-1Z"/>
+  <path fill="#fff" d="M419 286c7 0 13 6 13 13v7c0 7-6 13-13 13h-1v-33h1Z"/>
+</svg>

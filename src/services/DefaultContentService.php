@@ -108,7 +108,8 @@ class DefaultContentService extends Component
 
     private function ensureSection(): Section
     {
-        $section = Craft::$app->getEntries()->getSectionByHandle(self::SECTION_HANDLE);
+        $sectionsService = $this->sectionsService();
+        $section = $sectionsService->getSectionByHandle(self::SECTION_HANDLE);
         if ($section) {
             return $section;
         }
@@ -132,7 +133,7 @@ class DefaultContentService extends Component
             'siteSettings' => $siteSettings,
         ]);
 
-        if (!Craft::$app->getEntries()->saveSection($section)) {
+        if (!$sectionsService->saveSection($section)) {
             throw new Exception(sprintf(
                 'Could not save section "%s": %s',
                 self::SECTION_HANDLE,
@@ -192,11 +193,22 @@ class DefaultContentService extends Component
         $fieldLayout->setTabs($tabs);
         $entryType->setFieldLayout($fieldLayout);
 
-        if (!Craft::$app->getEntries()->saveEntryType($entryType)) {
+        if (!$this->sectionsService()->saveEntryType($entryType)) {
             throw new Exception(sprintf(
                 'Could not save popup entry type: %s',
                 implode(', ', $entryType->getErrorSummary(true))
             ));
         }
+    }
+
+    private function sectionsService(): object
+    {
+        $entries = Craft::$app->getEntries();
+
+        if (method_exists($entries, 'getAllSections')) {
+            return $entries;
+        }
+
+        return Craft::$app->getSections();
     }
 }

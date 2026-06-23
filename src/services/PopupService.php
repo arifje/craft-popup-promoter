@@ -18,7 +18,7 @@ class PopupService extends Component
             ['label' => 'Select a section', 'value' => ''],
         ];
 
-        foreach (Craft::$app->getEntries()->getAllSections() as $section) {
+        foreach ($this->sectionsService()->getAllSections() as $section) {
             $options[] = [
                 'label' => sprintf('%s (%s)', $section->name, $section->handle),
                 'value' => $section->handle,
@@ -119,6 +119,17 @@ class PopupService extends Component
         }
 
         return null;
+    }
+
+    private function sectionsService(): object
+    {
+        $entries = Craft::$app->getEntries();
+
+        if (method_exists($entries, 'getAllSections')) {
+            return $entries;
+        }
+
+        return Craft::$app->getSections();
     }
 
     private function isEntryClosed(Entry $entry, Settings $settings): bool
