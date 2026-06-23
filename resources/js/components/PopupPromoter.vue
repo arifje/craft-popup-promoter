@@ -137,7 +137,7 @@ function rememberDismissal() {
             :rel="popup.cta.target === '_blank' ? 'noopener noreferrer' : null"
             @click="rememberDismissal"
           >
-            {{ popup.cta.label }}
+            {{ popup.cta.label || 'Learn more' }}
           </a>
           <button v-if="popup.cancelLabel" class="cpp-cancel" type="button" @click="closeModal">
             {{ popup.cancelLabel }}

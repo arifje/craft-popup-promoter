@@ -793,7 +793,7 @@
         }
 
         if (testCta) {
-            testCta.textContent = popup.cta ? popup.cta.label : '';
+            testCta.textContent = popup.cta ? (popup.cta.label || 'Learn more') : '';
             testCta.hidden = !popup.cta;
         }
 

@@ -107,8 +107,8 @@ class PopupService extends Component
         $description = $this->stringFieldValue($entry, $settings->descriptionFieldHandle);
         $image = $this->imagePayload($entry, $settings);
         $ctaUrl = $this->urlFieldValue($entry, $settings->ctaUrlFieldHandle);
-        $ctaLabel = $this->stringFieldValue($entry, $settings->ctaLabelFieldHandle) ?: $settings->ctaLabelDefault;
-        $cancelLabel = $this->stringFieldValue($entry, $settings->cancelLabelFieldHandle) ?: $settings->cancelLabelDefault;
+        $ctaLabel = $this->stringFieldValue($entry, $settings->ctaLabelFieldHandle) ?: $this->fallbackString($settings->ctaLabelDefault, 'Learn more');
+        $cancelLabel = $this->stringFieldValue($entry, $settings->cancelLabelFieldHandle) ?: $this->fallbackString($settings->cancelLabelDefault, 'No thanks');
         $variant = $this->variantForSettings($settings);
 
         return [
@@ -212,6 +212,13 @@ class PopupService extends Component
         $value = trim((string)$value);
 
         return preg_match('/^#[0-9a-fA-F]{6}$/', $value) ? $value : $fallback;
+    }
+
+    private function fallbackString(?string $value, string $fallback): string
+    {
+        $value = trim((string)$value);
+
+        return $value !== '' ? $value : $fallback;
     }
 
     private function imagePayload(Entry $entry, Settings $settings): ?array
