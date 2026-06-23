@@ -29,7 +29,6 @@ class Settings extends Model
     public $defaultVariant = 'center';
     public $ctaLabelDefault = 'Learn more';
     public $ctaTarget = '_self';
-    public $imageTransform = '';
     public $cookieDurationDays = 30;
     public $cookieNamePrefix = 'craft_popup_promoter_closed';
     public $closeOnEsc = true;
@@ -66,7 +65,6 @@ class Settings extends Model
             'defaultVariant',
             'ctaLabelDefault',
             'ctaTarget',
-            'imageTransform',
             'cookieNamePrefix',
         ], 'string'];
         $rules[] = [['cookieDurationDays'], 'integer', 'min' => 0, 'max' => 3650];

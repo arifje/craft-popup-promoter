@@ -48,10 +48,14 @@ class Plugin extends BasePlugin
 
     protected function settingsHtml(): ?string
     {
+        /** @var Settings $settings */
+        $settings = $this->getSettings();
+
         return Craft::$app->getView()->renderTemplate('craft-popup-promoter/settings', [
-            'settings' => $this->getSettings(),
+            'settings' => $settings,
             'sections' => $this->popups->getSectionOptions(),
-            'fields' => $this->popups->getFieldOptions(),
+            'fields' => $this->popups->getFieldOptions($settings->sectionHandle),
+            'fieldsBySection' => $this->popups->getFieldOptionsBySection(),
             'variants' => Settings::variantOptions(),
             'installDefaultsAction' => UrlHelper::actionUrl('craft-popup-promoter/setup/install-defaults'),
         ]);

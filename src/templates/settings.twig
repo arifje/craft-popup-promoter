@@ -63,14 +63,6 @@
     errors: settings.getErrors('imageFieldHandle')
 }) }}
 
-{{ forms.textField({
-    label: 'Image transform handle',
-    instructions: 'Optional. Leave empty to use the asset URL without a transform.',
-    name: 'imageTransform',
-    value: settings.imageTransform,
-    errors: settings.getErrors('imageTransform')
-}) }}
-
 {{ forms.selectField({
     label: 'Call to action URL field',
     name: 'ctaUrlFieldHandle',
@@ -133,6 +125,16 @@
     errors: settings.getErrors('defaultVariant')
 }) }}
 
+<div class="field">
+    <div class="heading">
+        <label>Test modal</label>
+        <div class="instructions">
+            <p>Preview the current default variant before showing popups on the frontend.</p>
+        </div>
+    </div>
+    <button type="button" class="btn" data-cpp-test-modal>Test modal</button>
+</div>
+
 {{ forms.lightswitchField({
     label: 'Close on escape',
     name: 'closeOnEsc',
@@ -165,46 +167,394 @@
     errors: settings.getErrors('cookieDurationDays')
 }) }}
 
-{% js %}
-(() => {
-    const button = document.querySelector('[data-cpp-install-defaults]');
-    if (!button) {
-        return;
+<div class="cpp-test-overlay" data-cpp-test-overlay hidden>
+    <div class="cpp-test-shell" data-cpp-test-shell>
+        <article class="cpp-test-card" role="dialog" aria-modal="true" aria-labelledby="cpp-test-title">
+            <button class="cpp-test-close" type="button" aria-label="Close test modal" data-cpp-test-close>&times;</button>
+            <div class="cpp-test-media" aria-hidden="true">
+                <span></span>
+            </div>
+            <div class="cpp-test-main">
+                <p class="cpp-test-kicker">Promoted</p>
+                <h2 id="cpp-test-title" class="cpp-test-title">New app launch</h2>
+                <p class="cpp-test-description">A clean preview of how this popup variant will feel on the frontend.</p>
+                <button class="cpp-test-cta" type="button" data-cpp-test-cta>Learn more</button>
+            </div>
+        </article>
+    </div>
+</div>
+
+{% css %}
+.cpp-test-overlay[hidden] {
+    display: none;
+}
+
+.cpp-test-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(17, 24, 39, 0.58);
+}
+
+.cpp-test-shell {
+    width: min(100%, 620px);
+    color: #111827;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 24px 80px rgba(17, 24, 39, 0.28);
+    overflow: hidden;
+}
+
+.cpp-test-overlay[data-variant="top"] {
+    align-items: flex-start;
+}
+
+.cpp-test-overlay[data-variant="bottom"],
+.cpp-test-overlay[data-variant="corner"] {
+    align-items: flex-end;
+}
+
+.cpp-test-overlay[data-variant="left"] {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 0;
+}
+
+.cpp-test-overlay[data-variant="right"] {
+    align-items: stretch;
+    justify-content: flex-end;
+    padding: 0;
+}
+
+.cpp-test-overlay[data-variant="full"] {
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
+}
+
+.cpp-test-overlay[data-variant="corner"] {
+    justify-content: flex-end;
+}
+
+.cpp-test-overlay[data-variant="top"] .cpp-test-shell,
+.cpp-test-overlay[data-variant="bottom"] .cpp-test-shell {
+    width: min(100%, 880px);
+}
+
+.cpp-test-overlay[data-variant="left"] .cpp-test-shell,
+.cpp-test-overlay[data-variant="right"] .cpp-test-shell {
+    width: min(92vw, 440px);
+    min-height: 100vh;
+    border-radius: 0;
+}
+
+.cpp-test-overlay[data-variant="full"] .cpp-test-shell {
+    width: 100vw;
+    min-height: 100vh;
+    border-radius: 0;
+}
+
+.cpp-test-overlay[data-variant="corner"] .cpp-test-shell {
+    width: min(100%, 420px);
+}
+
+.cpp-test-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(180px, 42%) minmax(0, 1fr);
+    min-height: 100%;
+    background: #fff;
+}
+
+.cpp-test-overlay[data-variant="left"] .cpp-test-card,
+.cpp-test-overlay[data-variant="right"] .cpp-test-card,
+.cpp-test-overlay[data-variant="full"] .cpp-test-card {
+    grid-template-columns: 1fr;
+}
+
+.cpp-test-overlay[data-variant="full"] .cpp-test-card {
+    align-content: center;
+    justify-items: center;
+    padding: clamp(24px, 5vw, 80px);
+}
+
+.cpp-test-overlay[data-variant="full"] .cpp-test-main,
+.cpp-test-overlay[data-variant="full"] .cpp-test-media {
+    width: min(100%, 760px);
+}
+
+.cpp-test-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: #111827;
+    font-size: 26px;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.cpp-test-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    background: #e5e7eb;
+}
+
+.cpp-test-media span {
+    width: 74px;
+    height: 74px;
+    background: #2563eb;
+    border-radius: 8px;
+    box-shadow: 28px 20px 0 #0f766e, -18px -16px 0 #facc15;
+}
+
+.cpp-test-overlay[data-variant="full"] .cpp-test-media {
+    min-height: 320px;
+    margin-bottom: 28px;
+    border-radius: 8px;
+}
+
+.cpp-test-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 12px;
+    min-width: 0;
+    padding: clamp(24px, 4vw, 40px);
+}
+
+.cpp-test-kicker,
+.cpp-test-title,
+.cpp-test-description {
+    margin: 0;
+}
+
+.cpp-test-kicker {
+    color: #0f766e;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.cpp-test-title {
+    color: #111827;
+    font-size: clamp(28px, 4vw, 46px);
+    line-height: 1.08;
+}
+
+.cpp-test-overlay[data-variant="top"] .cpp-test-title,
+.cpp-test-overlay[data-variant="bottom"] .cpp-test-title,
+.cpp-test-overlay[data-variant="corner"] .cpp-test-title {
+    font-size: clamp(22px, 3vw, 34px);
+}
+
+.cpp-test-description {
+    color: #4b5563;
+    font-size: 17px;
+    line-height: 1.55;
+}
+
+.cpp-test-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: 6px;
+    padding: 0 18px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    background: #2563eb;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.cpp-test-cta:hover,
+.cpp-test-cta:focus {
+    color: #fff;
+    background: #1d4ed8;
+}
+
+@media (max-width: 640px) {
+    .cpp-test-overlay,
+    .cpp-test-overlay[data-variant="corner"] {
+        padding: 12px;
     }
 
-    const actionUrl = {{ installDefaultsAction|json_encode|raw }};
+    .cpp-test-card {
+        grid-template-columns: 1fr;
+    }
 
-    button.addEventListener('click', async () => {
-        button.classList.add('loading');
-        button.setAttribute('disabled', 'disabled');
+    .cpp-test-media {
+        min-height: 180px;
+    }
 
-        const body = new FormData();
-        if (Craft.csrfTokenName && Craft.csrfTokenValue) {
-            body.append(Craft.csrfTokenName, Craft.csrfTokenValue);
+    .cpp-test-main {
+        padding: 24px;
+    }
+
+    .cpp-test-title,
+    .cpp-test-overlay[data-variant="top"] .cpp-test-title,
+    .cpp-test-overlay[data-variant="bottom"] .cpp-test-title,
+    .cpp-test-overlay[data-variant="corner"] .cpp-test-title {
+        font-size: 28px;
+    }
+}
+{% endcss %}
+
+{% js %}
+(() => {
+    const fieldOptionsBySection = {{ fieldsBySection|json_encode|raw }};
+    const fallbackFieldOptions = fieldOptionsBySection[''] || [{ label: 'Not mapped', value: '' }];
+    const mappingFieldNames = [
+        'titleFieldHandle',
+        'descriptionFieldHandle',
+        'imageFieldHandle',
+        'ctaUrlFieldHandle',
+        'ctaLabelFieldHandle',
+        'closedFieldHandle',
+        'variantFieldHandle'
+    ];
+
+    const getNamedInput = (name) => document.querySelector(`[name="${name}"]`) || document.querySelector(`[name$="[${name}]"]`);
+    const sectionSelect = getNamedInput('sectionHandle');
+    const fieldSelects = mappingFieldNames
+        .map((name) => getNamedInput(name))
+        .filter((field) => field);
+
+    const replaceFieldOptions = (select, options) => {
+        const currentValue = select.value;
+        select.innerHTML = '';
+
+        for (const optionConfig of options) {
+            const option = document.createElement('option');
+            option.value = optionConfig.value;
+            option.textContent = optionConfig.label;
+            select.appendChild(option);
         }
 
-        try {
-            const response = await fetch(actionUrl, {
-                method: 'POST',
-                body,
-                credentials: 'same-origin',
-                headers: {
-                    Accept: 'application/json'
-                }
-            });
-            const data = await response.json();
+        select.value = options.some((optionConfig) => optionConfig.value === currentValue) ? currentValue : '';
+    };
 
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Could not create the default popup section.');
+    const updateFieldMappingOptions = () => {
+        if (!sectionSelect) {
+            return;
+        }
+
+        const options = fieldOptionsBySection[sectionSelect.value] || fallbackFieldOptions;
+        fieldSelects.forEach((select) => replaceFieldOptions(select, options));
+    };
+
+    if (sectionSelect) {
+        sectionSelect.addEventListener('change', updateFieldMappingOptions);
+        updateFieldMappingOptions();
+    }
+
+    const button = document.querySelector('[data-cpp-install-defaults]');
+    const actionUrl = {{ installDefaultsAction|json_encode|raw }};
+
+    if (button) {
+        button.addEventListener('click', async () => {
+            button.classList.add('loading');
+            button.setAttribute('disabled', 'disabled');
+
+            const body = new FormData();
+            if (Craft.csrfTokenName && Craft.csrfTokenValue) {
+                body.append(Craft.csrfTokenName, Craft.csrfTokenValue);
             }
 
-            Craft.cp.displayNotice(data.message);
-            window.location.reload();
-        } catch (error) {
-            Craft.cp.displayError(error.message);
-        } finally {
-            button.classList.remove('loading');
-            button.removeAttribute('disabled');
+            try {
+                const response = await fetch(actionUrl, {
+                    method: 'POST',
+                    body,
+                    credentials: 'same-origin',
+                    headers: {
+                        Accept: 'application/json'
+                    }
+                });
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Could not create the default popup section.');
+                }
+
+                Craft.cp.displayNotice(data.message);
+                window.location.reload();
+            } catch (error) {
+                Craft.cp.displayError(error.message);
+            } finally {
+                button.classList.remove('loading');
+                button.removeAttribute('disabled');
+            }
+        });
+    }
+
+    const testButton = document.querySelector('[data-cpp-test-modal]');
+    const testOverlay = document.querySelector('[data-cpp-test-overlay]');
+    const testClose = document.querySelector('[data-cpp-test-close]');
+    const testCta = document.querySelector('[data-cpp-test-cta]');
+
+    const closeTestModal = () => {
+        if (!testOverlay) {
+            return;
+        }
+
+        testOverlay.hidden = true;
+    };
+
+    const openTestModal = () => {
+        if (!testOverlay) {
+            return;
+        }
+
+        const variantInput = getNamedInput('defaultVariant');
+        const ctaLabelInput = getNamedInput('ctaLabelDefault');
+        const variant = variantInput && variantInput.value ? variantInput.value : 'center';
+        const ctaLabel = ctaLabelInput && ctaLabelInput.value ? ctaLabelInput.value : 'Learn more';
+
+        testOverlay.dataset.variant = variant;
+        if (testCta) {
+            testCta.textContent = ctaLabel;
+        }
+        testOverlay.hidden = false;
+    };
+
+    if (testButton) {
+        testButton.addEventListener('click', openTestModal);
+    }
+
+    if (testClose) {
+        testClose.addEventListener('click', closeTestModal);
+    }
+
+    if (testOverlay) {
+        testOverlay.addEventListener('click', (event) => {
+            if (event.target === testOverlay) {
+                closeTestModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeTestModal();
         }
     });
 })();

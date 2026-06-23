@@ -6,8 +6,10 @@ use arifje\craftpopuppromoter\models\Settings;
 use arifje\craftpopuppromoter\Plugin;
 use Craft;
 use craft\base\ElementInterface;
+use craft\base\FieldInterface;
 use craft\elements\Asset;
 use craft\elements\Entry;
+use craft\models\Section;
 use yii\base\Component;
 
 class PopupService extends Component
@@ -28,13 +30,13 @@ class PopupService extends Component
         return $options;
     }
 
-    public function getFieldOptions(): array
+    public function getFieldOptions(?string $sectionHandle = null): array
     {
         $options = [
             ['label' => 'Not mapped', 'value' => ''],
         ];
 
-        foreach (Craft::$app->getFields()->getAllFields() as $field) {
+        foreach ($this->getFieldsForSection($sectionHandle) as $field) {
             $options[] = [
                 'label' => sprintf('%s (%s)', $field->name, $field->handle),
                 'value' => $field->handle,
@@ -42,6 +44,19 @@ class PopupService extends Component
         }
 
         return $options;
+    }
+
+    public function getFieldOptionsBySection(): array
+    {
+        $fieldOptions = [
+            '' => $this->getFieldOptions(null),
+        ];
+
+        foreach ($this->sectionsService()->getAllSections() as $section) {
+            $fieldOptions[$section->handle] = $this->getFieldOptions($section->handle);
+        }
+
+        return $fieldOptions;
     }
 
     public function getPopupPayload(): ?array
@@ -171,9 +186,9 @@ class PopupService extends Component
         }
 
         try {
-            $url = $settings->imageTransform ? $asset->getUrl($settings->imageTransform) : $asset->getUrl();
-        } catch (\Throwable $exception) {
             $url = $asset->getUrl();
+        } catch (\Throwable $exception) {
+            $url = null;
         }
 
         if (!$url) {
@@ -265,5 +280,51 @@ class PopupService extends Component
         }
 
         return trim(strip_tags((string)$value));
+    }
+
+    /**
+     * @return FieldInterface[]
+     */
+    private function getFieldsForSection(?string $sectionHandle): array
+    {
+        if (!$sectionHandle) {
+            return [];
+        }
+
+        $section = $this->sectionsService()->getSectionByHandle($sectionHandle);
+        if (!$section) {
+            return [];
+        }
+
+        $fields = [];
+
+        foreach ($this->getEntryTypesForSection($section) as $entryType) {
+            $fieldLayout = $entryType->getFieldLayout();
+            if (!$fieldLayout) {
+                continue;
+            }
+
+            foreach ($fieldLayout->getCustomFields() as $field) {
+                $fields[$field->handle] = $field;
+            }
+        }
+
+        uasort($fields, static fn(FieldInterface $a, FieldInterface $b): int => strcasecmp($a->name, $b->name));
+
+        return array_values($fields);
+    }
+
+    private function getEntryTypesForSection(Section $section): array
+    {
+        if (method_exists($section, 'getEntryTypes')) {
+            return $section->getEntryTypes();
+        }
+
+        $sectionsService = $this->sectionsService();
+        if (method_exists($sectionsService, 'getEntryTypesBySectionId')) {
+            return $sectionsService->getEntryTypesBySectionId($section->id);
+        }
+
+        return [];
     }
 }

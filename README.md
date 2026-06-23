@@ -41,6 +41,8 @@ composer require arifje/craft-popup-promoter:@dev
 
 Open the plugin settings in the control panel and choose the entry section and field mappings. Only live entries are eligible, so disabled, pending, and expired entries are skipped automatically.
 
+Field mapping dropdowns show the custom fields available on the selected popup section. Use the test modal button to preview the current default variant directly from the settings page.
+
 Use the **Create default section + fields** button to create:
 
 - `popups` section
