@@ -37,9 +37,7 @@ onMounted(async () => {
     const data = await response.json();
 
     if (response.ok && data?.popup) {
-      popup.value = data.popup;
-      visible.value = true;
-      document.dispatchEvent(new CustomEvent('craft-popup-promoter:shown', { detail: data.popup }));
+      await showPopup(data.popup);
     }
   } catch (error) {
     document.dispatchEvent(new CustomEvent('craft-popup-promoter:error', { detail: error }));
@@ -47,6 +45,21 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+async function showPopup(nextPopup) {
+  const delayMs = Math.max(0, Number(nextPopup.delayMs) || 0);
+
+  popup.value = nextPopup;
+
+  if (delayMs > 0) {
+    await new Promise((resolve) => {
+      window.setTimeout(resolve, delayMs);
+    });
+  }
+
+  visible.value = true;
+  document.dispatchEvent(new CustomEvent('craft-popup-promoter:shown', { detail: nextPopup }));
+}
 
 watch(visible, (isVisible) => {
   if (!isVisible && popup.value) {

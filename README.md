@@ -87,6 +87,8 @@ Frontend assets are injected automatically by default. To control placement your
 
 When a popup is closed, the component sets a per-entry cookie. The cookie duration is configurable in plugin settings; use `0` for a session cookie.
 
+The popup can also be delayed by a configurable number of seconds so it does not open immediately on page load.
+
 ## Development
 
 Install frontend dependencies and build the browser asset:

@@ -29,6 +29,7 @@ class Settings extends Model
     public $defaultVariant = 'center';
     public $ctaLabelDefault = 'Learn more';
     public $ctaTarget = '_self';
+    public $delaySeconds = 0;
     public $cookieDurationDays = 30;
     public $cookieNamePrefix = 'craft_popup_promoter_closed';
     public $closeOnEsc = true;
@@ -65,6 +66,7 @@ class Settings extends Model
             'ctaTarget',
             'cookieNamePrefix',
         ], 'string'];
+        $rules[] = [['delaySeconds'], 'integer', 'min' => 0, 'max' => 86400];
         $rules[] = [['cookieDurationDays'], 'integer', 'min' => 0, 'max' => 3650];
         $rules[] = [['defaultVariant'], 'in', 'range' => array_keys(self::VARIANTS)];
         $rules[] = [['ctaTarget'], 'in', 'range' => ['_self', '_blank']];

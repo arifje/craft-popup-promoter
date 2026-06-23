@@ -107,6 +107,17 @@
     errors: settings.getErrors('defaultVariant')
 }) }}
 
+{{ forms.textField({
+    label: 'Delay before showing',
+    instructions: 'Number of seconds to wait before opening the popup on the frontend.',
+    name: 'delaySeconds',
+    value: settings.delaySeconds,
+    type: 'number',
+    min: 0,
+    max: 86400,
+    errors: settings.getErrors('delaySeconds')
+}) }}
+
 <div class="field">
     <div class="heading">
         <label>Test modal</label>
@@ -521,6 +532,7 @@
         'ctaUrlFieldHandle',
         'ctaLabelFieldHandle',
         'defaultVariant',
+        'delaySeconds',
         'ctaLabelDefault',
         'ctaTarget',
         'cookieDurationDays',

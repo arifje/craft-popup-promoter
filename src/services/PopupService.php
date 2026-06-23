@@ -122,6 +122,7 @@ class PopupService extends Component
                 'target' => $settings->ctaTarget ?: '_self',
             ] : null,
             'variant' => $variant,
+            'delayMs' => max(0, (int)$settings->delaySeconds) * 1000,
             'cookieName' => $this->cookieName($entry, $settings),
             'cookieDurationDays' => (int)$settings->cookieDurationDays,
             'closeOnEsc' => (bool)$settings->closeOnEsc,
@@ -327,6 +328,7 @@ class PopupService extends Component
         }
 
         $settings->cookieDurationDays = (int)$settings->cookieDurationDays;
+        $settings->delaySeconds = (int)$settings->delaySeconds;
 
         return $settings;
     }
@@ -345,6 +347,7 @@ class PopupService extends Component
             'defaultVariant',
             'ctaLabelDefault',
             'ctaTarget',
+            'delaySeconds',
             'cookieDurationDays',
             'cookieNamePrefix',
             'closeOnEsc',
