@@ -36,6 +36,17 @@
     <button type="button" class="btn" data-cpp-install-defaults>Create default section + fields</button>
 </div>
 
+<div class="cpp-confirm-overlay" data-cpp-install-confirm hidden>
+    <div class="cpp-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="cpp-install-confirm-title">
+        <h2 id="cpp-install-confirm-title">Create default content model?</h2>
+        <p>This will create or update the Popups section, add the default popup fields, and save the plugin field mappings.</p>
+        <div class="cpp-confirm-actions">
+            <button type="button" class="btn" data-cpp-install-cancel>Cancel</button>
+            <button type="button" class="btn submit" data-cpp-install-confirm-button>Create default content model</button>
+        </div>
+    </div>
+</div>
+
 <hr>
 
 {{ forms.selectField({
@@ -223,6 +234,52 @@
 {% css %}
 .cpp-test-overlay[hidden] {
     display: none;
+}
+
+.cpp-confirm-overlay[hidden] {
+    display: none;
+}
+
+.cpp-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(17, 24, 39, 0.54);
+}
+
+.cpp-confirm-dialog {
+    width: min(100%, 420px);
+    padding: 24px;
+    color: #111827;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 24px 80px rgba(17, 24, 39, 0.26);
+}
+
+.cpp-confirm-dialog h2 {
+    margin: 0 0 10px;
+    color: #111827;
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+.cpp-confirm-dialog p {
+    margin: 0;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.cpp-confirm-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
 }
 
 .cpp-test-overlay {
@@ -534,40 +591,103 @@
     }
 
     const button = document.querySelector('[data-cpp-install-defaults]');
+    const confirmOverlay = document.querySelector('[data-cpp-install-confirm]');
+    const confirmCancelButton = document.querySelector('[data-cpp-install-cancel]');
+    const confirmSubmitButton = document.querySelector('[data-cpp-install-confirm-button]');
     const actionUrl = {{ installDefaultsAction|json_encode|raw }};
+    const confirmMessage = 'Create or update the Popups section, default fields, and plugin field mappings?';
 
-    if (button) {
-        button.addEventListener('click', async () => {
-            button.classList.add('loading');
-            button.setAttribute('disabled', 'disabled');
+    const setInstallLoading = (loading) => {
+        if (button) {
+            button.classList.toggle('loading', loading);
+            button.toggleAttribute('disabled', loading);
+        }
 
-            const body = new FormData();
-            if (Craft.csrfTokenName && Craft.csrfTokenValue) {
-                body.append(Craft.csrfTokenName, Craft.csrfTokenValue);
+        if (confirmSubmitButton) {
+            confirmSubmitButton.classList.toggle('loading', loading);
+            confirmSubmitButton.toggleAttribute('disabled', loading);
+        }
+    };
+
+    const closeInstallConfirm = () => {
+        if (!confirmOverlay) {
+            return;
+        }
+
+        confirmOverlay.hidden = true;
+
+        if (button) {
+            button.focus();
+        }
+    };
+
+    const openInstallConfirm = () => {
+        if (!confirmOverlay) {
+            return window.confirm(confirmMessage);
+        }
+
+        confirmOverlay.hidden = false;
+
+        if (confirmSubmitButton) {
+            confirmSubmitButton.focus();
+        }
+
+        return false;
+    };
+
+    const installDefaults = async () => {
+        closeInstallConfirm();
+        setInstallLoading(true);
+
+        const body = new FormData();
+        if (Craft.csrfTokenName && Craft.csrfTokenValue) {
+            body.append(Craft.csrfTokenName, Craft.csrfTokenValue);
+        }
+
+        try {
+            const response = await fetch(actionUrl, {
+                method: 'POST',
+                body,
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Could not create the default popup section.');
             }
 
-            try {
-                const response = await fetch(actionUrl, {
-                    method: 'POST',
-                    body,
-                    credentials: 'same-origin',
-                    headers: {
-                        Accept: 'application/json'
-                    }
-                });
-                const data = await response.json();
+            Craft.cp.displayNotice(data.message);
+            window.location.reload();
+        } catch (error) {
+            Craft.cp.displayError(error.message);
+        } finally {
+            setInstallLoading(false);
+        }
+    };
 
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || 'Could not create the default popup section.');
-                }
+    if (button) {
+        button.addEventListener('click', () => {
+            if (openInstallConfirm()) {
+                installDefaults();
+            }
+        });
+    }
 
-                Craft.cp.displayNotice(data.message);
-                window.location.reload();
-            } catch (error) {
-                Craft.cp.displayError(error.message);
-            } finally {
-                button.classList.remove('loading');
-                button.removeAttribute('disabled');
+    if (confirmCancelButton) {
+        confirmCancelButton.addEventListener('click', closeInstallConfirm);
+    }
+
+    if (confirmSubmitButton) {
+        confirmSubmitButton.addEventListener('click', installDefaults);
+    }
+
+    if (confirmOverlay) {
+        confirmOverlay.addEventListener('click', (event) => {
+            if (event.target === confirmOverlay) {
+                closeInstallConfirm();
             }
         });
     }
@@ -739,6 +859,7 @@
 
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
+            closeInstallConfirm();
             closeTestModal();
         }
     });
