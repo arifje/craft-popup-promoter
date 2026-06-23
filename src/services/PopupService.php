@@ -46,14 +46,23 @@ class PopupService extends Component
         return $options;
     }
 
-    public function getFieldOptionsBySection(): array
+    public function getTitleFieldOptions(?string $sectionHandle = null): array
+    {
+        return array_merge([
+            ['label' => 'Entry title', 'value' => Settings::TITLE_SOURCE],
+        ], $this->getFieldOptions($sectionHandle));
+    }
+
+    public function getFieldOptionsBySection(bool $includeTitle = false): array
     {
         $fieldOptions = [
-            '' => $this->getFieldOptions(null),
+            '' => $includeTitle ? $this->getTitleFieldOptions(null) : $this->getFieldOptions(null),
         ];
 
         foreach ($this->sectionsService()->getAllSections() as $section) {
-            $fieldOptions[$section->handle] = $this->getFieldOptions($section->handle);
+            $fieldOptions[$section->handle] = $includeTitle
+                ? $this->getTitleFieldOptions($section->handle)
+                : $this->getFieldOptions($section->handle);
         }
 
         return $fieldOptions;
@@ -68,17 +77,38 @@ class PopupService extends Component
             return null;
         }
 
-        $entry = $this->pickEntry($settings);
+        $entry = $this->pickEntry($settings, true);
         if (!$entry) {
             return null;
         }
 
+        return $this->payloadForEntry($entry, $settings);
+    }
+
+    public function getPreviewPayload(array $config): ?array
+    {
+        $settings = $this->settingsFromConfig($config);
+
+        if (!$settings->sectionHandle) {
+            return null;
+        }
+
+        $entry = $this->pickEntry($settings, false);
+        if (!$entry) {
+            return null;
+        }
+
+        return $this->payloadForEntry($entry, $settings);
+    }
+
+    private function payloadForEntry(Entry $entry, Settings $settings): array
+    {
         $title = $this->stringFieldValue($entry, $settings->titleFieldHandle);
         $description = $this->stringFieldValue($entry, $settings->descriptionFieldHandle);
         $image = $this->imagePayload($entry, $settings);
         $ctaUrl = $this->urlFieldValue($entry, $settings->ctaUrlFieldHandle);
         $ctaLabel = $this->stringFieldValue($entry, $settings->ctaLabelFieldHandle) ?: $settings->ctaLabelDefault;
-        $variant = $this->variantForEntry($entry, $settings);
+        $variant = $this->variantForSettings($settings);
 
         return [
             'id' => (int)$entry->id,
@@ -99,7 +129,7 @@ class PopupService extends Component
         ];
     }
 
-    private function pickEntry(Settings $settings): ?Entry
+    private function pickEntry(Settings $settings, bool $respectDismissalCookies): ?Entry
     {
         try {
             $entries = Entry::find()
@@ -126,8 +156,7 @@ class PopupService extends Component
         foreach ($entries as $entry) {
             if (
                 $entry instanceof Entry
-                && !$this->isEntryClosed($entry, $settings)
-                && !$this->hasDismissalCookie($entry, $settings)
+                && (!$respectDismissalCookies || !$this->hasDismissalCookie($entry, $settings))
             ) {
                 return $entry;
             }
@@ -147,15 +176,6 @@ class PopupService extends Component
         return Craft::$app->getSections();
     }
 
-    private function isEntryClosed(Entry $entry, Settings $settings): bool
-    {
-        if (!$settings->closedFieldHandle) {
-            return false;
-        }
-
-        return (bool)$this->fieldValue($entry, $settings->closedFieldHandle);
-    }
-
     private function hasDismissalCookie(Entry $entry, Settings $settings): bool
     {
         return Craft::$app->getRequest()->getCookies()->getValue($this->cookieName($entry, $settings)) !== null;
@@ -169,9 +189,9 @@ class PopupService extends Component
         return $prefix . '_' . preg_replace('/[^A-Za-z0-9_-]/', '_', (string)$identifier);
     }
 
-    private function variantForEntry(Entry $entry, Settings $settings): string
+    private function variantForSettings(Settings $settings): string
     {
-        $variant = $this->stringFieldValue($entry, $settings->variantFieldHandle) ?: $settings->defaultVariant;
+        $variant = $settings->defaultVariant ?: 'center';
 
         return array_key_exists($variant, Settings::VARIANTS) ? $variant : 'center';
     }
@@ -254,6 +274,10 @@ class PopupService extends Component
             return null;
         }
 
+        if ($handle === Settings::TITLE_SOURCE || $handle === 'title') {
+            return $entry->title;
+        }
+
         try {
             return $entry->getFieldValue($handle);
         } catch (\Throwable $exception) {
@@ -280,6 +304,52 @@ class PopupService extends Component
         }
 
         return trim(strip_tags((string)$value));
+    }
+
+    private function settingsFromConfig(array $config): Settings
+    {
+        /** @var Settings $currentSettings */
+        $currentSettings = Plugin::getInstance()->getSettings();
+        $settings = new Settings();
+
+        foreach ($this->settingKeys() as $key) {
+            $settings->$key = $currentSettings->$key;
+        }
+
+        foreach ($this->settingKeys() as $key) {
+            if (array_key_exists($key, $config)) {
+                $settings->$key = $config[$key];
+            }
+        }
+
+        foreach (['enabled', 'autoInject', 'closeOnEsc', 'closeOnBackdrop'] as $key) {
+            $settings->$key = filter_var($settings->$key, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $settings->cookieDurationDays = (int)$settings->cookieDurationDays;
+
+        return $settings;
+    }
+
+    private function settingKeys(): array
+    {
+        return [
+            'enabled',
+            'autoInject',
+            'sectionHandle',
+            'titleFieldHandle',
+            'descriptionFieldHandle',
+            'imageFieldHandle',
+            'ctaUrlFieldHandle',
+            'ctaLabelFieldHandle',
+            'defaultVariant',
+            'ctaLabelDefault',
+            'ctaTarget',
+            'cookieDurationDays',
+            'cookieNamePrefix',
+            'closeOnEsc',
+            'closeOnBackdrop',
+        ];
     }
 
     /**

@@ -37,4 +37,25 @@ class SetupController extends Controller
             'sectionHandle' => $result['section']->handle,
         ]);
     }
+
+    public function actionPreview(): Response
+    {
+        $this->requireCpRequest();
+        $this->requirePostRequest();
+        $this->requirePermission('settings');
+
+        $payload = Plugin::getInstance()->popups->getPreviewPayload(Craft::$app->getRequest()->getBodyParams());
+
+        if (!$payload) {
+            return $this->asJson([
+                'success' => false,
+                'message' => 'No live popup entry is available for the selected section and mappings.',
+            ]);
+        }
+
+        return $this->asJson([
+            'success' => true,
+            'popup' => $payload,
+        ]);
+    }
 }

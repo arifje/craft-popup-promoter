@@ -2,7 +2,7 @@
 
 Popup Promoter is a Craft CMS 4 and Craft CMS 5 plugin for showing promotional modal popups from entries.
 
-It can use an existing section and field setup, or create a default `Popups` section with fields for description, image, call to action URL, call to action label, variant, and a closed lightswitch.
+It can use an existing section and field setup, or create a default `Popups` section with fields for description, image, call to action URL, and call to action label.
 
 ## Requirements
 
@@ -41,7 +41,7 @@ composer require arifje/craft-popup-promoter:@dev
 
 Open the plugin settings in the control panel and choose the entry section and field mappings. Only live entries are eligible, so disabled, pending, and expired entries are skipped automatically.
 
-Field mapping dropdowns show the custom fields available on the selected popup section. Use the test modal button to preview the current default variant directly from the settings page.
+Field mapping dropdowns show the custom fields available on the selected popup section. Use the test modal button to preview a random live entry with the current mappings directly from the settings page.
 
 Use the **Create default section + fields** button to create:
 
@@ -50,8 +50,6 @@ Use the **Create default section + fields** button to create:
 - `popupImage` assets field
 - `popupCtaUrl` plain text field
 - `popupCtaLabel` plain text field
-- `popupVariant` dropdown field
-- `popupClosed` lightswitch field
 
 The same setup can be run from the command line:
 
@@ -64,9 +62,8 @@ php craft craft-popup-promoter/setup/install-defaults
 On each frontend page request, the plugin endpoint:
 
 1. Queries live entries from the configured section.
-2. Skips entries with the mapped closed field enabled.
-3. Skips entries with an active dismissal cookie for the current visitor.
-4. Randomly selects one remaining entry.
+2. Skips entries with an active dismissal cookie for the current visitor.
+3. Randomly selects one remaining entry.
 
 If nothing is eligible, no popup is rendered.
 

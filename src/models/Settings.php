@@ -6,6 +6,8 @@ use craft\base\Model;
 
 class Settings extends Model
 {
+    public const TITLE_SOURCE = '__title__';
+
     public const VARIANTS = [
         'center' => 'Centered modal',
         'full' => 'Full page modal',
@@ -19,13 +21,11 @@ class Settings extends Model
     public $enabled = true;
     public $autoInject = true;
     public $sectionHandle = '';
-    public $titleFieldHandle = '';
+    public $titleFieldHandle = self::TITLE_SOURCE;
     public $descriptionFieldHandle = 'popupDescription';
     public $imageFieldHandle = 'popupImage';
     public $ctaUrlFieldHandle = 'popupCtaUrl';
     public $ctaLabelFieldHandle = 'popupCtaLabel';
-    public $closedFieldHandle = 'popupClosed';
-    public $variantFieldHandle = 'popupVariant';
     public $defaultVariant = 'center';
     public $ctaLabelDefault = 'Learn more';
     public $ctaTarget = '_self';
@@ -60,8 +60,6 @@ class Settings extends Model
             'imageFieldHandle',
             'ctaUrlFieldHandle',
             'ctaLabelFieldHandle',
-            'closedFieldHandle',
-            'variantFieldHandle',
             'defaultVariant',
             'ctaLabelDefault',
             'ctaTarget',

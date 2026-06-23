@@ -7,8 +7,6 @@ use Craft;
 use craft\elements\Entry;
 use craft\fieldlayoutelements\CustomField;
 use craft\fields\Assets;
-use craft\fields\Dropdown;
-use craft\fields\Lightswitch;
 use craft\fields\PlainText;
 use craft\models\FieldLayout;
 use craft\models\FieldLayoutTab;
@@ -34,8 +32,6 @@ class DefaultContentService extends Component
             'imageFieldHandle' => 'popupImage',
             'ctaUrlFieldHandle' => 'popupCtaUrl',
             'ctaLabelFieldHandle' => 'popupCtaLabel',
-            'closedFieldHandle' => 'popupClosed',
-            'variantFieldHandle' => 'popupVariant',
             'defaultVariant' => 'center',
         ];
 
@@ -64,21 +60,6 @@ class DefaultContentService extends Component
             ]),
             'popupCtaUrl' => $this->ensureField(PlainText::class, 'Popup Call to Action URL', 'popupCtaUrl'),
             'popupCtaLabel' => $this->ensureField(PlainText::class, 'Popup Call to Action Label', 'popupCtaLabel'),
-            'popupVariant' => $this->ensureField(Dropdown::class, 'Popup Variant', 'popupVariant', [
-                'options' => [
-                    ['label' => 'Use plugin default', 'value' => '', 'default' => true],
-                    ['label' => 'Centered modal', 'value' => 'center', 'default' => false],
-                    ['label' => 'Full page modal', 'value' => 'full', 'default' => false],
-                    ['label' => 'Top banner', 'value' => 'top', 'default' => false],
-                    ['label' => 'Bottom banner', 'value' => 'bottom', 'default' => false],
-                    ['label' => 'Left drawer', 'value' => 'left', 'default' => false],
-                    ['label' => 'Right drawer', 'value' => 'right', 'default' => false],
-                    ['label' => 'Corner modal', 'value' => 'corner', 'default' => false],
-                ],
-            ]),
-            'popupClosed' => $this->ensureField(Lightswitch::class, 'Popup Closed', 'popupClosed', [
-                'default' => false,
-            ]),
         ];
     }
 

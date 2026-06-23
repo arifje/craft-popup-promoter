@@ -55,9 +55,12 @@ class Plugin extends BasePlugin
             'settings' => $settings,
             'sections' => $this->popups->getSectionOptions(),
             'fields' => $this->popups->getFieldOptions($settings->sectionHandle),
+            'titleFields' => $this->popups->getTitleFieldOptions($settings->sectionHandle),
             'fieldsBySection' => $this->popups->getFieldOptionsBySection(),
+            'titleFieldsBySection' => $this->popups->getFieldOptionsBySection(true),
             'variants' => Settings::variantOptions(),
             'installDefaultsAction' => UrlHelper::actionUrl('craft-popup-promoter/setup/install-defaults'),
+            'previewAction' => UrlHelper::actionUrl('craft-popup-promoter/setup/preview'),
         ]);
     }
 

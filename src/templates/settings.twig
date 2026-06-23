@@ -19,7 +19,7 @@
 
 {{ forms.selectField({
     label: 'Popup section',
-    instructions: 'Only live entries from this section are considered. Disabled, pending, expired, or closed entries are skipped.',
+    instructions: 'Only live entries from this section are considered. Disabled, pending, and expired entries are skipped.',
     name: 'sectionHandle',
     value: settings.sectionHandle,
     options: sections,
@@ -30,7 +30,7 @@
     <div class="heading">
         <label>Default content model</label>
         <div class="instructions">
-            <p>Create a Popups section with description, image, call to action, variant, and closed fields, then map these settings automatically.</p>
+            <p>Create a Popups section with description, image, and call to action fields, then map these settings automatically.</p>
         </div>
     </div>
     <button type="button" class="btn" data-cpp-install-defaults>Create default section + fields</button>
@@ -40,10 +40,10 @@
 
 {{ forms.selectField({
     label: 'Title field',
-    instructions: 'Leave unmapped to use the entry title.',
+    instructions: 'Select Entry title or map a custom field.',
     name: 'titleFieldHandle',
     value: settings.titleFieldHandle,
-    options: fields,
+    options: titleFields,
     errors: settings.getErrors('titleFieldHandle')
 }) }}
 
@@ -100,24 +100,6 @@
 <hr>
 
 {{ forms.selectField({
-    label: 'Closed field',
-    instructions: 'Map a lightswitch field. Entries with this enabled will not be shown.',
-    name: 'closedFieldHandle',
-    value: settings.closedFieldHandle,
-    options: fields,
-    errors: settings.getErrors('closedFieldHandle')
-}) }}
-
-{{ forms.selectField({
-    label: 'Variant field',
-    instructions: 'Optional per-entry override. Leave an entry value empty to use the default variant below.',
-    name: 'variantFieldHandle',
-    value: settings.variantFieldHandle,
-    options: fields,
-    errors: settings.getErrors('variantFieldHandle')
-}) }}
-
-{{ forms.selectField({
     label: 'Default variant',
     name: 'defaultVariant',
     value: settings.defaultVariant,
@@ -129,7 +111,7 @@
     <div class="heading">
         <label>Test modal</label>
         <div class="instructions">
-            <p>Preview the current default variant before showing popups on the frontend.</p>
+            <p>Preview a random live entry from the selected section using the current mappings.</p>
         </div>
     </div>
     <button type="button" class="btn" data-cpp-test-modal>Test modal</button>
@@ -172,13 +154,14 @@
         <article class="cpp-test-card" role="dialog" aria-modal="true" aria-labelledby="cpp-test-title">
             <button class="cpp-test-close" type="button" aria-label="Close test modal" data-cpp-test-close>&times;</button>
             <div class="cpp-test-media" aria-hidden="true">
-                <span></span>
+                <img alt="" data-cpp-test-image hidden>
+                <span data-cpp-test-placeholder></span>
             </div>
             <div class="cpp-test-main">
                 <p class="cpp-test-kicker">Promoted</p>
-                <h2 id="cpp-test-title" class="cpp-test-title">New app launch</h2>
-                <p class="cpp-test-description">A clean preview of how this popup variant will feel on the frontend.</p>
-                <button class="cpp-test-cta" type="button" data-cpp-test-cta>Learn more</button>
+                <h2 id="cpp-test-title" class="cpp-test-title" data-cpp-test-title></h2>
+                <p class="cpp-test-description" data-cpp-test-description></p>
+                <button class="cpp-test-cta" type="button" data-cpp-test-cta></button>
             </div>
         </article>
     </div>
@@ -310,6 +293,15 @@
     justify-content: center;
     min-height: 220px;
     background: #e5e7eb;
+    overflow: hidden;
+}
+
+.cpp-test-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    object-fit: cover;
 }
 
 .cpp-test-media span {
@@ -422,15 +414,14 @@
 {% js %}
 (() => {
     const fieldOptionsBySection = {{ fieldsBySection|json_encode|raw }};
+    const titleFieldOptionsBySection = {{ titleFieldsBySection|json_encode|raw }};
     const fallbackFieldOptions = fieldOptionsBySection[''] || [{ label: 'Not mapped', value: '' }];
+    const fallbackTitleFieldOptions = titleFieldOptionsBySection[''] || [{ label: 'Entry title', value: '__title__' }];
     const mappingFieldNames = [
-        'titleFieldHandle',
         'descriptionFieldHandle',
         'imageFieldHandle',
         'ctaUrlFieldHandle',
-        'ctaLabelFieldHandle',
-        'closedFieldHandle',
-        'variantFieldHandle'
+        'ctaLabelFieldHandle'
     ];
 
     const getNamedInput = (name) => document.querySelector(`[name="${name}"]`) || document.querySelector(`[name$="[${name}]"]`);
@@ -438,6 +429,7 @@
     const fieldSelects = mappingFieldNames
         .map((name) => getNamedInput(name))
         .filter((field) => field);
+    const titleFieldSelect = getNamedInput('titleFieldHandle');
 
     const replaceFieldOptions = (select, options) => {
         const currentValue = select.value;
@@ -460,6 +452,10 @@
 
         const options = fieldOptionsBySection[sectionSelect.value] || fallbackFieldOptions;
         fieldSelects.forEach((select) => replaceFieldOptions(select, options));
+
+        if (titleFieldSelect) {
+            replaceFieldOptions(titleFieldSelect, titleFieldOptionsBySection[sectionSelect.value] || fallbackTitleFieldOptions);
+        }
     };
 
     if (sectionSelect) {
@@ -510,6 +506,28 @@
     const testOverlay = document.querySelector('[data-cpp-test-overlay]');
     const testClose = document.querySelector('[data-cpp-test-close]');
     const testCta = document.querySelector('[data-cpp-test-cta]');
+    const testTitle = document.querySelector('[data-cpp-test-title]');
+    const testDescription = document.querySelector('[data-cpp-test-description]');
+    const testImage = document.querySelector('[data-cpp-test-image]');
+    const testPlaceholder = document.querySelector('[data-cpp-test-placeholder]');
+    const previewActionUrl = {{ previewAction|json_encode|raw }};
+    const previewFieldNames = [
+        'enabled',
+        'autoInject',
+        'sectionHandle',
+        'titleFieldHandle',
+        'descriptionFieldHandle',
+        'imageFieldHandle',
+        'ctaUrlFieldHandle',
+        'ctaLabelFieldHandle',
+        'defaultVariant',
+        'ctaLabelDefault',
+        'ctaTarget',
+        'cookieDurationDays',
+        'cookieNamePrefix',
+        'closeOnEsc',
+        'closeOnBackdrop'
+    ];
 
     const closeTestModal = () => {
         if (!testOverlay) {
@@ -519,21 +537,96 @@
         testOverlay.hidden = true;
     };
 
-    const openTestModal = () => {
+    const previewBody = () => {
+        const body = new FormData();
+
+        if (Craft.csrfTokenName && Craft.csrfTokenValue) {
+            body.append(Craft.csrfTokenName, Craft.csrfTokenValue);
+        }
+
+        for (const name of previewFieldNames) {
+            const field = getNamedInput(name);
+            if (!field) {
+                continue;
+            }
+
+            if (field.type === 'checkbox') {
+                body.append(name, field.checked ? '1' : '0');
+            } else {
+                body.append(name, field.value);
+            }
+        }
+
+        return body;
+    };
+
+    const populateTestModal = (popup) => {
         if (!testOverlay) {
             return;
         }
 
-        const variantInput = getNamedInput('defaultVariant');
-        const ctaLabelInput = getNamedInput('ctaLabelDefault');
-        const variant = variantInput && variantInput.value ? variantInput.value : 'center';
-        const ctaLabel = ctaLabelInput && ctaLabelInput.value ? ctaLabelInput.value : 'Learn more';
+        testOverlay.dataset.variant = popup.variant || 'center';
 
-        testOverlay.dataset.variant = variant;
-        if (testCta) {
-            testCta.textContent = ctaLabel;
+        if (testTitle) {
+            testTitle.textContent = popup.title || 'Untitled popup';
         }
+
+        if (testDescription) {
+            testDescription.textContent = popup.description || '';
+            testDescription.hidden = !popup.description;
+        }
+
+        if (testImage && testPlaceholder) {
+            if (popup.image && popup.image.url) {
+                testImage.src = popup.image.url;
+                testImage.alt = popup.image.alt || '';
+                testImage.hidden = false;
+                testPlaceholder.hidden = true;
+            } else {
+                testImage.removeAttribute('src');
+                testImage.hidden = true;
+                testPlaceholder.hidden = false;
+            }
+        }
+
+        if (testCta) {
+            testCta.textContent = popup.cta ? popup.cta.label : '';
+            testCta.hidden = !popup.cta;
+        }
+
         testOverlay.hidden = false;
+    };
+
+    const openTestModal = async () => {
+        if (!testOverlay || !testButton) {
+            return;
+        }
+
+        testButton.classList.add('loading');
+        testButton.setAttribute('disabled', 'disabled');
+
+        try {
+            const response = await fetch(previewActionUrl, {
+                method: 'POST',
+                body: previewBody(),
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success || !data.popup) {
+                throw new Error(data.message || 'No live popup entry is available for preview.');
+            }
+
+            populateTestModal(data.popup);
+        } catch (error) {
+            Craft.cp.displayError(error.message);
+        } finally {
+            testButton.classList.remove('loading');
+            testButton.removeAttribute('disabled');
+        }
     };
 
     if (testButton) {
