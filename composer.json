@@ -18,13 +18,8 @@
     }
   },
   "extra": {
-    "craftcms": {
-      "plugin": {
-        "handle": "craft-popup-promoter",
-        "name": "Popup Promoter",
-        "class": "arifje\\craftpopuppromoter\\Plugin",
-        "schemaVersion": "1.0.0"
-      }
-    }
+    "name": "Popup Promoter",
+    "handle": "craft-popup-promoter",
+    "class": "arifje\\craftpopuppromoter\\Plugin"
   }
 }
