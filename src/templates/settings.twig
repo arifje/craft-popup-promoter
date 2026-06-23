@@ -1,0 +1,211 @@
+{% import '_includes/forms.twig' as forms %}
+
+{{ forms.lightswitchField({
+    label: 'Enable popups',
+    name: 'enabled',
+    on: settings.enabled,
+    errors: settings.getErrors('enabled')
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Automatically inject frontend assets',
+    instructions: 'When disabled, add {{ craft.popupPromoter.register() }} to your layout template.',
+    name: 'autoInject',
+    on: settings.autoInject,
+    errors: settings.getErrors('autoInject')
+}) }}
+
+<hr>
+
+{{ forms.selectField({
+    label: 'Popup section',
+    instructions: 'Only live entries from this section are considered. Disabled, pending, expired, or closed entries are skipped.',
+    name: 'sectionHandle',
+    value: settings.sectionHandle,
+    options: sections,
+    errors: settings.getErrors('sectionHandle')
+}) }}
+
+<div class="field">
+    <div class="heading">
+        <label>Default content model</label>
+        <div class="instructions">
+            <p>Create a Popups section with description, image, call to action, variant, and closed fields, then map these settings automatically.</p>
+        </div>
+    </div>
+    <button type="button" class="btn" data-cpp-install-defaults>Create default section + fields</button>
+</div>
+
+<hr>
+
+{{ forms.selectField({
+    label: 'Title field',
+    instructions: 'Leave unmapped to use the entry title.',
+    name: 'titleFieldHandle',
+    value: settings.titleFieldHandle,
+    options: fields,
+    errors: settings.getErrors('titleFieldHandle')
+}) }}
+
+{{ forms.selectField({
+    label: 'Description field',
+    name: 'descriptionFieldHandle',
+    value: settings.descriptionFieldHandle,
+    options: fields,
+    errors: settings.getErrors('descriptionFieldHandle')
+}) }}
+
+{{ forms.selectField({
+    label: 'Image field',
+    name: 'imageFieldHandle',
+    value: settings.imageFieldHandle,
+    options: fields,
+    errors: settings.getErrors('imageFieldHandle')
+}) }}
+
+{{ forms.textField({
+    label: 'Image transform handle',
+    instructions: 'Optional. Leave empty to use the asset URL without a transform.',
+    name: 'imageTransform',
+    value: settings.imageTransform,
+    errors: settings.getErrors('imageTransform')
+}) }}
+
+{{ forms.selectField({
+    label: 'Call to action URL field',
+    name: 'ctaUrlFieldHandle',
+    value: settings.ctaUrlFieldHandle,
+    options: fields,
+    errors: settings.getErrors('ctaUrlFieldHandle')
+}) }}
+
+{{ forms.selectField({
+    label: 'Call to action label field',
+    name: 'ctaLabelFieldHandle',
+    value: settings.ctaLabelFieldHandle,
+    options: fields,
+    errors: settings.getErrors('ctaLabelFieldHandle')
+}) }}
+
+{{ forms.textField({
+    label: 'Fallback call to action label',
+    name: 'ctaLabelDefault',
+    value: settings.ctaLabelDefault,
+    errors: settings.getErrors('ctaLabelDefault')
+}) }}
+
+{{ forms.selectField({
+    label: 'Call to action target',
+    name: 'ctaTarget',
+    value: settings.ctaTarget,
+    options: [
+        { label: 'Same tab', value: '_self' },
+        { label: 'New tab', value: '_blank' }
+    ],
+    errors: settings.getErrors('ctaTarget')
+}) }}
+
+<hr>
+
+{{ forms.selectField({
+    label: 'Closed field',
+    instructions: 'Map a lightswitch field. Entries with this enabled will not be shown.',
+    name: 'closedFieldHandle',
+    value: settings.closedFieldHandle,
+    options: fields,
+    errors: settings.getErrors('closedFieldHandle')
+}) }}
+
+{{ forms.selectField({
+    label: 'Variant field',
+    instructions: 'Optional per-entry override. Leave an entry value empty to use the default variant below.',
+    name: 'variantFieldHandle',
+    value: settings.variantFieldHandle,
+    options: fields,
+    errors: settings.getErrors('variantFieldHandle')
+}) }}
+
+{{ forms.selectField({
+    label: 'Default variant',
+    name: 'defaultVariant',
+    value: settings.defaultVariant,
+    options: variants,
+    errors: settings.getErrors('defaultVariant')
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Close on escape',
+    name: 'closeOnEsc',
+    on: settings.closeOnEsc,
+    errors: settings.getErrors('closeOnEsc')
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Close on backdrop click',
+    name: 'closeOnBackdrop',
+    on: settings.closeOnBackdrop,
+    errors: settings.getErrors('closeOnBackdrop')
+}) }}
+
+{{ forms.textField({
+    label: 'Cookie name prefix',
+    name: 'cookieNamePrefix',
+    value: settings.cookieNamePrefix,
+    errors: settings.getErrors('cookieNamePrefix')
+}) }}
+
+{{ forms.textField({
+    label: 'Cookie duration in days',
+    instructions: 'Use 0 for a session cookie.',
+    name: 'cookieDurationDays',
+    value: settings.cookieDurationDays,
+    type: 'number',
+    min: 0,
+    max: 3650,
+    errors: settings.getErrors('cookieDurationDays')
+}) }}
+
+{% js %}
+(() => {
+    const button = document.querySelector('[data-cpp-install-defaults]');
+    if (!button) {
+        return;
+    }
+
+    const actionUrl = {{ installDefaultsAction|json_encode|raw }};
+
+    button.addEventListener('click', async () => {
+        button.classList.add('loading');
+        button.setAttribute('disabled', 'disabled');
+
+        const body = new FormData();
+        if (Craft.csrfTokenName && Craft.csrfTokenValue) {
+            body.append(Craft.csrfTokenName, Craft.csrfTokenValue);
+        }
+
+        try {
+            const response = await fetch(actionUrl, {
+                method: 'POST',
+                body,
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Could not create the default popup section.');
+            }
+
+            Craft.cp.displayNotice(data.message);
+            window.location.reload();
+        } catch (error) {
+            Craft.cp.displayError(error.message);
+        } finally {
+            button.classList.remove('loading');
+            button.removeAttribute('disabled');
+        }
+    });
+})();
+{% endjs %}
