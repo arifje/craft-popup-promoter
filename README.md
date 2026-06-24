@@ -84,10 +84,22 @@ The frontend is a Vue 3 component powered by `vue-final-modal`. It supports thes
 
 You can either choose one default variant or enable randomized variants to mix the display style automatically on each popup render.
 
-Frontend assets are injected automatically by default. To control placement yourself, disable automatic injection and add this to your layout:
+The frontend integration is registered automatically by default. To control placement yourself, disable automatic injection and add this to your layout:
 
 ```twig
 {{ craft.popupPromoter.register() }}
+```
+
+If you use your own Vite/Vue frontend component, disable **Load default Vue component** in the plugin settings. The plugin will then skip its bundled Vue/CSS asset bundle. You can still expose the popup endpoint to your frontend with:
+
+```twig
+{{ craft.popupPromoter.registerConfig() }}
+```
+
+That outputs `window.CraftPopupPromoterConfig.endpoint`. You can also read the endpoint directly in Twig:
+
+```twig
+{{ craft.popupPromoter.endpointUrl() }}
 ```
 
 When a popup is closed, the component sets a per-entry cookie. The cookie duration is configurable in plugin settings; use `0` for a session cookie.

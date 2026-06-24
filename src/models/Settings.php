@@ -20,6 +20,7 @@ class Settings extends Model
 
     public $enabled = true;
     public $autoInject = true;
+    public $loadDefaultAssets = true;
     public $sectionHandle = '';
     public $titleFieldHandle = self::TITLE_SOURCE;
     public $descriptionFieldHandle = 'popupDescription';
@@ -58,7 +59,7 @@ class Settings extends Model
     {
         $rules = parent::defineRules();
 
-        $rules[] = [['enabled', 'autoInject', 'closeOnEsc', 'closeOnBackdrop', 'randomizeVariants'], 'boolean'];
+        $rules[] = [['enabled', 'autoInject', 'loadDefaultAssets', 'closeOnEsc', 'closeOnBackdrop', 'randomizeVariants'], 'boolean'];
         $rules[] = [[
             'sectionHandle',
             'titleFieldHandle',

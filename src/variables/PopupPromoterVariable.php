@@ -13,6 +13,18 @@ class PopupPromoterVariable
         return '';
     }
 
+    public function registerConfig(): string
+    {
+        Plugin::getInstance()->registerFrontendConfig();
+
+        return '';
+    }
+
+    public function endpointUrl(): string
+    {
+        return Plugin::getInstance()->popupEndpointUrl();
+    }
+
     public function payload(): ?array
     {
         return Plugin::getInstance()->popups->getPopupPayload();

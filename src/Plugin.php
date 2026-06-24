@@ -24,6 +24,7 @@ class Plugin extends BasePlugin
     public bool $hasCpSettings = true;
     public string $schemaVersion = '1.0.0';
 
+    private bool $frontendConfigRegistered = false;
     private bool $frontendAssetsRegistered = false;
 
     public function init(): void
@@ -75,17 +76,45 @@ class Plugin extends BasePlugin
             return;
         }
 
+        $this->registerFrontendConfig();
+
+        if (!$settings->loadDefaultAssets) {
+            $this->frontendAssetsRegistered = true;
+
+            return;
+        }
+
+        Craft::$app->getView()->registerAssetBundle(PopupPromoterAsset::class);
+
+        $this->frontendAssetsRegistered = true;
+    }
+
+    public function registerFrontendConfig(): void
+    {
+        if ($this->frontendConfigRegistered || Craft::$app instanceof ConsoleApplication) {
+            return;
+        }
+
+        $settings = $this->getSettings();
+        if (!$settings->enabled) {
+            return;
+        }
+
         $view = Craft::$app->getView();
         $view->registerJs(
             'window.CraftPopupPromoterConfig = ' . Json::encode([
-                'endpoint' => UrlHelper::actionUrl('craft-popup-promoter/popup/data'),
+                'endpoint' => $this->popupEndpointUrl(),
             ]) . ';',
             View::POS_HEAD,
             'craft-popup-promoter-config'
         );
-        $view->registerAssetBundle(PopupPromoterAsset::class);
 
-        $this->frontendAssetsRegistered = true;
+        $this->frontendConfigRegistered = true;
+    }
+
+    public function popupEndpointUrl(): string
+    {
+        return UrlHelper::actionUrl('craft-popup-promoter/popup/data');
     }
 
     private function registerCraftVariable(): void

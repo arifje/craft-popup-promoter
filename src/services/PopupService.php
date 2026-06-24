@@ -347,7 +347,7 @@ class PopupService extends Component
             }
         }
 
-        foreach (['enabled', 'autoInject', 'closeOnEsc', 'closeOnBackdrop', 'randomizeVariants'] as $key) {
+        foreach (['enabled', 'autoInject', 'loadDefaultAssets', 'closeOnEsc', 'closeOnBackdrop', 'randomizeVariants'] as $key) {
             $settings->$key = filter_var($settings->$key, FILTER_VALIDATE_BOOLEAN);
         }
 
@@ -362,6 +362,7 @@ class PopupService extends Component
         return [
             'enabled',
             'autoInject',
+            'loadDefaultAssets',
             'sectionHandle',
             'titleFieldHandle',
             'descriptionFieldHandle',

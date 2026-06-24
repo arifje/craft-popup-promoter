@@ -8,11 +8,19 @@
 }) }}
 
 {{ forms.lightswitchField({
-    label: 'Automatically inject frontend assets',
-    instructions: 'When disabled, add {{ craft.popupPromoter.register() }} to your layout template.',
+    label: 'Automatically register frontend integration',
+    instructions: 'When disabled, add {{ craft.popupPromoter.register() }} for the bundled frontend, or {{ craft.popupPromoter.registerConfig() }} when rendering with your own frontend.',
     name: 'autoInject',
     on: settings.autoInject,
     errors: settings.getErrors('autoInject')
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Load default Vue component',
+    instructions: 'Disable this when your own Vite/Vue frontend renders the popup. The plugin can still expose window.CraftPopupPromoterConfig with the endpoint.',
+    name: 'loadDefaultAssets',
+    on: settings.loadDefaultAssets,
+    errors: settings.getErrors('loadDefaultAssets')
 }) }}
 
 <hr>
@@ -706,6 +714,7 @@
     const previewFieldNames = [
         'enabled',
         'autoInject',
+        'loadDefaultAssets',
         'sectionHandle',
         'titleFieldHandle',
         'descriptionFieldHandle',
