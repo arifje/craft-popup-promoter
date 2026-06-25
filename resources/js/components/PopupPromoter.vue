@@ -19,6 +19,13 @@ const titleId = computed(() => (popup.value ? `craft-popup-promoter-title-${popu
 const modalClass = computed(() => ['cpp-modal', `cpp-modal--${variant.value}`]);
 const contentClass = computed(() => ['cpp-content', `cpp-content--${variant.value}`]);
 const hasImage = computed(() => Boolean(popup.value?.image?.url));
+const promotedLabel = computed(() => firstVisibleText(
+  popup.value?.promotedLabel,
+  popup.value?.promotedText,
+  popup.value?.kickerLabel,
+  popup.value?.eyebrowLabel,
+  'Promoted',
+));
 const ctaLabel = computed(() => firstVisibleText(
   popup.value?.cta?.label,
   popup.value?.cta?.text,
@@ -155,7 +162,7 @@ function rememberDismissal() {
       </div>
 
       <div class="cpp-main">
-        <p class="cpp-kicker">Promoted</p>
+        <p class="cpp-kicker">{{ promotedLabel }}</p>
         <h2 :id="titleId" class="cpp-title">{{ popup.title }}</h2>
         <p v-if="popup.description" class="cpp-description">{{ popup.description }}</p>
         <div class="cpp-actions">

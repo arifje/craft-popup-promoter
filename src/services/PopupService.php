@@ -107,6 +107,10 @@ class PopupService extends Component
         $description = $this->stringFieldValue($entry, $settings->descriptionFieldHandle);
         $image = $this->imagePayload($entry, $settings);
         $ctaUrl = $this->urlFieldValue($entry, $settings->ctaUrlFieldHandle);
+        $promotedLabel = $this->fallbackString(
+            $this->stringFieldValue($entry, $settings->promotedLabelFieldHandle),
+            $this->fallbackString($settings->promotedLabelDefault, 'Promoted')
+        );
         $ctaLabel = $this->fallbackString(
             $this->stringFieldValue($entry, $settings->ctaLabelFieldHandle),
             $this->fallbackString($settings->ctaLabelDefault, 'Learn more')
@@ -123,6 +127,10 @@ class PopupService extends Component
             'title' => $title ?: (string)$entry->title,
             'description' => $description,
             'image' => $image,
+            'promotedLabel' => $promotedLabel,
+            'promotedText' => $promotedLabel,
+            'kickerLabel' => $promotedLabel,
+            'eyebrowLabel' => $promotedLabel,
             'cta' => $ctaUrl ? [
                 'url' => $ctaUrl,
                 'label' => $ctaLabel,
@@ -394,8 +402,10 @@ class PopupService extends Component
             'ctaUrlFieldHandle',
             'ctaLabelFieldHandle',
             'cancelLabelFieldHandle',
+            'promotedLabelFieldHandle',
             'defaultVariant',
             'randomizeVariants',
+            'promotedLabelDefault',
             'ctaLabelDefault',
             'cancelLabelDefault',
             'ctaTarget',

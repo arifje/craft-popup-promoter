@@ -2,7 +2,7 @@
 
 Popup Promoter is a Craft CMS 4 and Craft CMS 5 plugin for showing promotional modal popups from entries.
 
-It can use an existing section and field setup, or create a default `Popups` section with fields for description, image, call to action URL, call to action label, and cancel button label.
+It can use an existing section and field setup, or create a default `Popups` section with fields for description, image, promoted label, call to action URL, call to action label, and cancel button label.
 
 ## Requirements
 
@@ -43,13 +43,14 @@ Open the plugin settings in the control panel and choose the entry section and f
 
 Field mapping dropdowns show the custom fields available on the selected popup section. Use the test modal button to preview a random live entry with the current mappings directly from the settings page.
 
-The call to action label and cancel button text can both be mapped from entry fields, with fallback text configured in plugin settings. Button colors can be configured independently for the primary call to action and cancel button.
+The promoted label, call to action label, and cancel button text can be mapped from entry fields, with fallback text configured in plugin settings. Button colors can be configured independently for the primary call to action and cancel button.
 
 Use the **Create default section + fields** button to create:
 
 - `popups` section
 - `popupDescription` plain text field
 - `popupImage` assets field
+- `popupPromotedLabel` plain text field
 - `popupCtaUrl` plain text field
 - `popupCtaLabel` plain text field
 - `popupCancelLabel` plain text field
@@ -103,6 +104,8 @@ That outputs `window.CraftPopupPromoterConfig.endpoint`. You can also read the e
 ```
 
 The endpoint returns the CTA text as `popup.cta.label`, `popup.cta.text`, `popup.cta.title`, and `popup.cta.buttonText`, with the same value also available as top-level aliases like `popup.ctaLabel`, `popup.ctaText`, `popup.ctaButtonLabel`, `popup.ctaButtonText`, and `popup.buttonText` for custom frontends.
+
+The promoted/kicker label is available as `popup.promotedLabel`, `popup.promotedText`, `popup.kickerLabel`, and `popup.eyebrowLabel`.
 
 When a popup is closed, the component sets a per-entry cookie. The cookie duration is configurable in plugin settings; use `0` for a session cookie.
 

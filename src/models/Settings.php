@@ -28,8 +28,10 @@ class Settings extends Model
     public $ctaUrlFieldHandle = 'popupCtaUrl';
     public $ctaLabelFieldHandle = 'popupCtaLabel';
     public $cancelLabelFieldHandle = 'popupCancelLabel';
+    public $promotedLabelFieldHandle = 'popupPromotedLabel';
     public $defaultVariant = 'center';
     public $randomizeVariants = false;
+    public $promotedLabelDefault = 'Promoted';
     public $ctaLabelDefault = 'Learn more';
     public $cancelLabelDefault = 'No thanks';
     public $ctaTarget = '_self';
@@ -68,7 +70,9 @@ class Settings extends Model
             'ctaUrlFieldHandle',
             'ctaLabelFieldHandle',
             'cancelLabelFieldHandle',
+            'promotedLabelFieldHandle',
             'defaultVariant',
+            'promotedLabelDefault',
             'ctaLabelDefault',
             'cancelLabelDefault',
             'ctaTarget',

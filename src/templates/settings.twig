@@ -38,7 +38,7 @@
     <div class="heading">
         <label>Default content model</label>
         <div class="instructions">
-            <p>Create a Popups section with description, image, call to action, and cancel button label fields, then map these settings automatically.</p>
+            <p>Create a Popups section with description, image, promoted label, call to action, and cancel button label fields, then map these settings automatically.</p>
         </div>
     </div>
     <button type="button" class="btn" data-cpp-install-defaults>Create default section + fields</button>
@@ -72,6 +72,21 @@
     value: settings.descriptionFieldHandle,
     options: fields,
     errors: settings.getErrors('descriptionFieldHandle')
+}) }}
+
+{{ forms.selectField({
+    label: 'Promoted label field',
+    name: 'promotedLabelFieldHandle',
+    value: settings.promotedLabelFieldHandle,
+    options: fields,
+    errors: settings.getErrors('promotedLabelFieldHandle')
+}) }}
+
+{{ forms.textField({
+    label: 'Fallback promoted label text',
+    name: 'promotedLabelDefault',
+    value: settings.promotedLabelDefault,
+    errors: settings.getErrors('promotedLabelDefault')
 }) }}
 
 {{ forms.selectField({
@@ -227,7 +242,7 @@
                 <span data-cpp-test-placeholder></span>
             </div>
             <div class="cpp-test-main">
-                <p class="cpp-test-kicker">Promoted</p>
+                <p class="cpp-test-kicker" data-cpp-test-promoted-label>Promoted</p>
                 <h2 id="cpp-test-title" class="cpp-test-title" data-cpp-test-title></h2>
                 <p class="cpp-test-description" data-cpp-test-description></p>
                 <div class="cpp-test-actions">
@@ -557,6 +572,7 @@
     const fallbackTitleFieldOptions = titleFieldOptionsBySection[''] || [{ label: 'Entry title', value: '__title__' }];
     const mappingFieldNames = [
         'descriptionFieldHandle',
+        'promotedLabelFieldHandle',
         'imageFieldHandle',
         'ctaUrlFieldHandle',
         'ctaLabelFieldHandle',
@@ -710,6 +726,7 @@
     const testClose = document.querySelector('[data-cpp-test-close]');
     const testCta = document.querySelector('[data-cpp-test-cta]');
     const testCancel = document.querySelector('[data-cpp-test-cancel]');
+    const testPromotedLabel = document.querySelector('[data-cpp-test-promoted-label]');
     const testTitle = document.querySelector('[data-cpp-test-title]');
     const testDescription = document.querySelector('[data-cpp-test-description]');
     const testImage = document.querySelector('[data-cpp-test-image]');
@@ -722,6 +739,7 @@
         'sectionHandle',
         'titleFieldHandle',
         'descriptionFieldHandle',
+        'promotedLabelFieldHandle',
         'imageFieldHandle',
         'ctaUrlFieldHandle',
         'ctaLabelFieldHandle',
@@ -729,6 +747,7 @@
         'defaultVariant',
         'randomizeVariants',
         'delaySeconds',
+        'promotedLabelDefault',
         'ctaLabelDefault',
         'cancelLabelDefault',
         'ctaTarget',
@@ -799,6 +818,14 @@
         'Learn more'
     );
 
+    const promotedLabel = (popup) => firstVisibleText(
+        popup.promotedLabel,
+        popup.promotedText,
+        popup.kickerLabel,
+        popup.eyebrowLabel,
+        'Promoted'
+    );
+
     const populateTestModal = (popup) => {
         if (!testOverlay) {
             return;
@@ -813,6 +840,10 @@
 
         if (testTitle) {
             testTitle.textContent = popup.title || 'Untitled popup';
+        }
+
+        if (testPromotedLabel) {
+            testPromotedLabel.textContent = promotedLabel(popup);
         }
 
         if (testDescription) {

@@ -33,6 +33,7 @@ class DefaultContentService extends Component
             'ctaUrlFieldHandle' => 'popupCtaUrl',
             'ctaLabelFieldHandle' => 'popupCtaLabel',
             'cancelLabelFieldHandle' => 'popupCancelLabel',
+            'promotedLabelFieldHandle' => 'popupPromotedLabel',
             'defaultVariant' => 'center',
         ];
 
@@ -62,6 +63,7 @@ class DefaultContentService extends Component
             'popupCtaUrl' => $this->ensureField(PlainText::class, 'Popup Call to Action URL', 'popupCtaUrl'),
             'popupCtaLabel' => $this->ensureField(PlainText::class, 'Popup Call to Action Label', 'popupCtaLabel'),
             'popupCancelLabel' => $this->ensureField(PlainText::class, 'Popup Cancel Button Label', 'popupCancelLabel'),
+            'popupPromotedLabel' => $this->ensureField(PlainText::class, 'Popup Promoted Label', 'popupPromotedLabel'),
         ];
     }
 
