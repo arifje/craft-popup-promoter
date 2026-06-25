@@ -120,8 +120,11 @@ class PopupService extends Component
             'cta' => $ctaUrl ? [
                 'url' => $ctaUrl,
                 'label' => $ctaLabel,
+                'text' => $ctaLabel,
                 'target' => $settings->ctaTarget ?: '_self',
             ] : null,
+            'ctaLabel' => $ctaLabel,
+            'ctaText' => $ctaLabel,
             'cancelLabel' => $cancelLabel,
             'variant' => $variant,
             'buttonColor' => $this->colorValue($settings->buttonColor, '#2563eb'),
