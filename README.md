@@ -102,7 +102,7 @@ That outputs `window.CraftPopupPromoterConfig.endpoint`. You can also read the e
 {{ craft.popupPromoter.endpointUrl() }}
 ```
 
-The endpoint returns the CTA text as `popup.cta.label` and `popup.cta.text`, with the same value also available as `popup.ctaLabel` and `popup.ctaText` for custom frontends.
+The endpoint returns the CTA text as `popup.cta.label`, `popup.cta.text`, `popup.cta.title`, and `popup.cta.buttonText`, with the same value also available as top-level aliases like `popup.ctaLabel`, `popup.ctaText`, `popup.ctaButtonLabel`, `popup.ctaButtonText`, and `popup.buttonText` for custom frontends.
 
 When a popup is closed, the component sets a per-entry cookie. The cookie duration is configurable in plugin settings; use `0` for a session cookie.
 

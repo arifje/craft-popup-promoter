@@ -506,6 +506,10 @@
     background: var(--cpp-test-button-color, #2563eb);
 }
 
+.cpp-test-cta:empty::before {
+    content: attr(data-fallback-label);
+}
+
 .cpp-test-cancel {
     background: var(--cpp-test-cancel-button-color, #6b7280);
 }
@@ -783,8 +787,15 @@
     const ctaLabel = (popup) => firstVisibleText(
         popup.cta && popup.cta.label,
         popup.cta && popup.cta.text,
+        popup.cta && popup.cta.title,
+        popup.cta && popup.cta.buttonText,
+        popup.buttonText,
+        popup.ctaButtonLabel,
+        popup.ctaButtonText,
         popup.ctaLabel,
         popup.ctaText,
+        popup.callToActionLabel,
+        popup.callToActionText,
         'Learn more'
     );
 
@@ -823,7 +834,9 @@
         }
 
         if (testCta) {
-            testCta.textContent = popup.cta ? ctaLabel(popup) : '';
+            const label = ctaLabel(popup);
+            testCta.textContent = popup.cta ? label : '';
+            testCta.dataset.fallbackLabel = label;
             testCta.hidden = !popup.cta;
         }
 

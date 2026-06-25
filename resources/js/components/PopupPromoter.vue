@@ -22,8 +22,15 @@ const hasImage = computed(() => Boolean(popup.value?.image?.url));
 const ctaLabel = computed(() => firstVisibleText(
   popup.value?.cta?.label,
   popup.value?.cta?.text,
+  popup.value?.cta?.title,
+  popup.value?.cta?.buttonText,
+  popup.value?.buttonText,
+  popup.value?.ctaButtonLabel,
+  popup.value?.ctaButtonText,
   popup.value?.ctaLabel,
   popup.value?.ctaText,
+  popup.value?.callToActionLabel,
+  popup.value?.callToActionText,
   'Learn more',
 ));
 const buttonStyles = computed(() => ({
@@ -158,6 +165,7 @@ function rememberDismissal() {
             :href="popup.cta.url"
             :target="popup.cta.target"
             :rel="popup.cta.target === '_blank' ? 'noopener noreferrer' : null"
+            :data-fallback-label="ctaLabel"
             @click="rememberDismissal"
           >
             {{ ctaLabel }}

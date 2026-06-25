@@ -231,6 +231,10 @@
   background: var(--cpp-button-color, var(--cpp-accent));
 }
 
+.cpp-cta:empty::before {
+  content: attr(data-fallback-label);
+}
+
 .cpp-cancel {
   background: var(--cpp-cancel-button-color, #6b7280);
 }
