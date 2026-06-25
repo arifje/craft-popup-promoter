@@ -767,6 +767,27 @@
         return body;
     };
 
+    const visibleText = (value) => String(value || '').replace(/\u00a0/g, ' ').trim();
+
+    const firstVisibleText = (...values) => {
+        for (const value of values) {
+            const text = visibleText(value);
+            if (text) {
+                return text;
+            }
+        }
+
+        return '';
+    };
+
+    const ctaLabel = (popup) => firstVisibleText(
+        popup.cta && popup.cta.label,
+        popup.cta && popup.cta.text,
+        popup.ctaLabel,
+        popup.ctaText,
+        'Learn more'
+    );
+
     const populateTestModal = (popup) => {
         if (!testOverlay) {
             return;
@@ -802,7 +823,7 @@
         }
 
         if (testCta) {
-            testCta.textContent = popup.cta ? (popup.cta.label || 'Learn more') : '';
+            testCta.textContent = popup.cta ? ctaLabel(popup) : '';
             testCta.hidden = !popup.cta;
         }
 

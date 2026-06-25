@@ -19,6 +19,13 @@ const titleId = computed(() => (popup.value ? `craft-popup-promoter-title-${popu
 const modalClass = computed(() => ['cpp-modal', `cpp-modal--${variant.value}`]);
 const contentClass = computed(() => ['cpp-content', `cpp-content--${variant.value}`]);
 const hasImage = computed(() => Boolean(popup.value?.image?.url));
+const ctaLabel = computed(() => firstVisibleText(
+  popup.value?.cta?.label,
+  popup.value?.cta?.text,
+  popup.value?.ctaLabel,
+  popup.value?.ctaText,
+  'Learn more',
+));
 const buttonStyles = computed(() => ({
   '--cpp-button-color': popup.value?.buttonColor || '#2563eb',
   '--cpp-cancel-button-color': popup.value?.cancelButtonColor || '#6b7280',
@@ -74,6 +81,22 @@ watch(visible, (isVisible) => {
 function closeModal() {
   rememberDismissal();
   visible.value = false;
+}
+
+function visibleText(value) {
+  return String(value || '').replace(/\u00a0/g, ' ').trim();
+}
+
+function firstVisibleText(...values) {
+  for (const value of values) {
+    const text = visibleText(value);
+
+    if (text) {
+      return text;
+    }
+  }
+
+  return '';
 }
 
 function rememberDismissal() {
@@ -137,7 +160,7 @@ function rememberDismissal() {
             :rel="popup.cta.target === '_blank' ? 'noopener noreferrer' : null"
             @click="rememberDismissal"
           >
-            {{ popup.cta.label || 'Learn more' }}
+            {{ ctaLabel }}
           </a>
           <button v-if="popup.cancelLabel" class="cpp-cancel" type="button" @click="closeModal">
             {{ popup.cancelLabel }}

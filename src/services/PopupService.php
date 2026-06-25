@@ -107,8 +107,14 @@ class PopupService extends Component
         $description = $this->stringFieldValue($entry, $settings->descriptionFieldHandle);
         $image = $this->imagePayload($entry, $settings);
         $ctaUrl = $this->urlFieldValue($entry, $settings->ctaUrlFieldHandle);
-        $ctaLabel = $this->stringFieldValue($entry, $settings->ctaLabelFieldHandle) ?: $this->fallbackString($settings->ctaLabelDefault, 'Learn more');
-        $cancelLabel = $this->stringFieldValue($entry, $settings->cancelLabelFieldHandle) ?: $this->fallbackString($settings->cancelLabelDefault, 'No thanks');
+        $ctaLabel = $this->fallbackString(
+            $this->stringFieldValue($entry, $settings->ctaLabelFieldHandle),
+            $this->fallbackString($settings->ctaLabelDefault, 'Learn more')
+        );
+        $cancelLabel = $this->fallbackString(
+            $this->stringFieldValue($entry, $settings->cancelLabelFieldHandle),
+            $this->fallbackString($settings->cancelLabelDefault, 'No thanks')
+        );
         $variant = $this->variantForSettings($settings);
 
         return [
@@ -219,9 +225,17 @@ class PopupService extends Component
 
     private function fallbackString(?string $value, string $fallback): string
     {
-        $value = trim((string)$value);
+        $value = $this->visibleString($value);
 
         return $value !== '' ? $value : $fallback;
+    }
+
+    private function visibleString(?string $value): string
+    {
+        $value = html_entity_decode((string)$value, ENT_QUOTES | ENT_HTML5, Craft::$app->charset);
+        $value = str_replace("\xC2\xA0", ' ', $value);
+
+        return trim($value);
     }
 
     private function imagePayload(Entry $entry, Settings $settings): ?array
@@ -320,18 +334,18 @@ class PopupService extends Component
         }
 
         if (is_array($value)) {
-            return trim(implode(', ', array_filter(array_map([$this, 'normalizeString'], $value))));
+            return $this->visibleString(implode(', ', array_filter(array_map([$this, 'normalizeString'], $value))));
         }
 
         if (is_object($value)) {
             if (method_exists($value, '__toString')) {
-                return trim(strip_tags((string)$value));
+                return $this->visibleString(strip_tags((string)$value));
             }
 
             return '';
         }
 
-        return trim(strip_tags((string)$value));
+        return $this->visibleString(strip_tags((string)$value));
     }
 
     private function settingsFromConfig(array $config): Settings
