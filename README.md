@@ -2,7 +2,7 @@
 
 Popup Promoter is a Craft CMS 4 and Craft CMS 5 plugin for showing promotional modal popups from entries.
 
-It can use an existing section and field setup, or create a default `Popups` section with fields for description, image, promoted label, call to action URL, call to action label, and cancel button label.
+It can use an existing section and field setup, or create a default `Popups` section with fields for a show switch, description, image, promoted label, call to action URL, call to action label, and cancel button label.
 
 ## Requirements
 
@@ -43,11 +43,12 @@ Open the plugin settings in the control panel and choose the entry section and f
 
 Field mapping dropdowns show the custom fields available on the selected popup section. Use the test modal button to preview a random live entry with the current mappings directly from the settings page.
 
-The promoted label, call to action label, and cancel button text can be mapped from entry fields, with fallback text configured in plugin settings. Button colors can be configured independently for the primary call to action and cancel button.
+The show switch, promoted label, call to action label, and cancel button text can be mapped from entry fields, with fallback text configured in plugin settings where relevant. Button colors can be configured independently for the primary call to action and cancel button.
 
 Use the **Create default section + fields** button to create:
 
 - `popups` section
+- `popupShow` lightswitch field
 - `popupDescription` plain text field
 - `popupImage` assets field
 - `popupPromotedLabel` plain text field
@@ -66,8 +67,9 @@ php craft craft-popup-promoter/setup/install-defaults
 On each frontend page request, the plugin endpoint:
 
 1. Queries live entries from the configured section.
-2. Skips entries with an active dismissal cookie for the current visitor.
-3. Randomly selects one remaining entry.
+2. Skips entries where the mapped show-popup field is off.
+3. Skips entries with an active dismissal cookie for the current visitor.
+4. Randomly selects one remaining entry.
 
 If nothing is eligible, no popup is rendered.
 

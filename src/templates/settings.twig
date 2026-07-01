@@ -38,7 +38,7 @@
     <div class="heading">
         <label>Default content model</label>
         <div class="instructions">
-            <p>Create a Popups section with description, image, promoted label, call to action, and cancel button label fields, then map these settings automatically.</p>
+            <p>Create a Popups section with show switch, description, image, promoted label, call to action, and cancel button label fields, then map these settings automatically.</p>
         </div>
     </div>
     <button type="button" class="btn" data-cpp-install-defaults>Create default section + fields</button>
@@ -64,6 +64,15 @@
     value: settings.titleFieldHandle,
     options: titleFields,
     errors: settings.getErrors('titleFieldHandle')
+}) }}
+
+{{ forms.selectField({
+    label: 'Show popup field',
+    instructions: 'Map a Lightswitch field. When mapped, only entries with this field enabled are eligible for popups.',
+    name: 'showPopupFieldHandle',
+    value: settings.showPopupFieldHandle,
+    options: fields,
+    errors: settings.getErrors('showPopupFieldHandle')
 }) }}
 
 {{ forms.selectField({
@@ -571,6 +580,7 @@
     const fallbackFieldOptions = fieldOptionsBySection[''] || [{ label: 'Not mapped', value: '' }];
     const fallbackTitleFieldOptions = titleFieldOptionsBySection[''] || [{ label: 'Entry title', value: '__title__' }];
     const mappingFieldNames = [
+        'showPopupFieldHandle',
         'descriptionFieldHandle',
         'promotedLabelFieldHandle',
         'imageFieldHandle',
@@ -738,6 +748,7 @@
         'loadDefaultAssets',
         'sectionHandle',
         'titleFieldHandle',
+        'showPopupFieldHandle',
         'descriptionFieldHandle',
         'promotedLabelFieldHandle',
         'imageFieldHandle',

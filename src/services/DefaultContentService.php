@@ -7,6 +7,7 @@ use Craft;
 use craft\elements\Entry;
 use craft\fieldlayoutelements\CustomField;
 use craft\fields\Assets;
+use craft\fields\Lightswitch;
 use craft\fields\PlainText;
 use craft\models\FieldLayout;
 use craft\models\FieldLayoutTab;
@@ -28,6 +29,7 @@ class DefaultContentService extends Component
 
         $settings = [
             'sectionHandle' => $section->handle,
+            'showPopupFieldHandle' => 'popupShow',
             'descriptionFieldHandle' => 'popupDescription',
             'imageFieldHandle' => 'popupImage',
             'ctaUrlFieldHandle' => 'popupCtaUrl',
@@ -52,6 +54,7 @@ class DefaultContentService extends Component
     private function ensureFields(): array
     {
         return [
+            'popupShow' => $this->ensureField(Lightswitch::class, 'Show Popup', 'popupShow'),
             'popupDescription' => $this->ensureField(PlainText::class, 'Popup Description', 'popupDescription', [
                 'multiline' => true,
                 'initialRows' => 4,

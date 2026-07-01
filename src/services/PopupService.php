@@ -185,6 +185,7 @@ class PopupService extends Component
         foreach ($entries as $entry) {
             if (
                 $entry instanceof Entry
+                && $this->entryAllowsPopup($entry, $settings)
                 && (!$respectDismissalCookies || !$this->hasDismissalCookie($entry, $settings))
             ) {
                 return $entry;
@@ -192,6 +193,15 @@ class PopupService extends Component
         }
 
         return null;
+    }
+
+    private function entryAllowsPopup(Entry $entry, Settings $settings): bool
+    {
+        if (!$settings->showPopupFieldHandle) {
+            return true;
+        }
+
+        return $this->booleanFieldValue($entry, $settings->showPopupFieldHandle);
     }
 
     private function sectionsService(): object
@@ -325,6 +335,50 @@ class PopupService extends Component
         return $this->normalizeString($this->fieldValue($entry, $handle));
     }
 
+    private function booleanFieldValue(Entry $entry, string $handle): bool
+    {
+        $value = $this->fieldValue($entry, $handle);
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value)) {
+            return $value === 1;
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if ($this->normalizeBooleanValue($item)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return $this->normalizeBooleanValue($value);
+    }
+
+    private function normalizeBooleanValue($value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value)) {
+            return $value === 1;
+        }
+
+        if (is_object($value) && method_exists($value, '__toString')) {
+            $value = (string)$value;
+        }
+
+        $value = strtolower($this->visibleString((string)$value));
+
+        return in_array($value, ['1', 'true', 'yes', 'on'], true);
+    }
+
     private function fieldValue(Entry $entry, string $handle)
     {
         if (!$handle) {
@@ -397,6 +451,7 @@ class PopupService extends Component
             'loadDefaultAssets',
             'sectionHandle',
             'titleFieldHandle',
+            'showPopupFieldHandle',
             'descriptionFieldHandle',
             'imageFieldHandle',
             'ctaUrlFieldHandle',

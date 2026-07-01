@@ -23,6 +23,7 @@ class Settings extends Model
     public $loadDefaultAssets = true;
     public $sectionHandle = '';
     public $titleFieldHandle = self::TITLE_SOURCE;
+    public $showPopupFieldHandle = '';
     public $descriptionFieldHandle = 'popupDescription';
     public $imageFieldHandle = 'popupImage';
     public $ctaUrlFieldHandle = 'popupCtaUrl';
@@ -65,6 +66,7 @@ class Settings extends Model
         $rules[] = [[
             'sectionHandle',
             'titleFieldHandle',
+            'showPopupFieldHandle',
             'descriptionFieldHandle',
             'imageFieldHandle',
             'ctaUrlFieldHandle',
