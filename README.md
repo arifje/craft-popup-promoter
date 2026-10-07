@@ -66,12 +66,15 @@ php craft craft-popup-promoter/setup/install-defaults
 
 On each frontend page request, the plugin endpoint:
 
-1. Queries live entries from the configured section.
-2. Skips entries where the mapped show-popup field is off.
-3. Skips entries with an active dismissal cookie for the current visitor.
-4. Randomly selects one remaining entry.
+1. Queries and shuffles live entry IDs from the configured section and current site.
+2. Loads candidates in batches of at most 50 entries.
+3. Skips entries where the mapped show-popup field is off or the current visitor has an active dismissal cookie.
+4. Returns the first eligible entry in the shuffled order.
 
 If nothing is eligible, no popup is rendered.
+Only IDs are loaded for the entire section; entry hydration is bounded. When all candidates are ineligible, all batches still need to be checked.
+
+CTA URLs allow HTTP, HTTPS, `mailto:`, `tel:`, and relative links. Unsafe schemes, control characters, backslashes, and malformed HTTP(S) URLs omit the CTA from the payload, including for custom frontends.
 
 ## Frontend
 
@@ -126,6 +129,23 @@ The build writes:
 
 - `src/web/assets/dist/popup-promoter.iife.js`
 - `src/web/assets/dist/popup-promoter.css`
+
+Run the PHP regression checks against an existing Craft installation's dependencies:
+
+```bash
+php tests/run.php /path/to/craft/vendor
+```
+
+For Docker development, run that command inside the existing PHP container with paths visible there. Run it against both Craft 4 and 5. The checks use real framework models and cookie handling with in-memory persistence/query doubles; they do not bootstrap a site or write to a database. They cover URL rejection, dismissal cookies, bounded entry selection, default field/layout setup, and setup retries. A full installation and CP smoke test still requires a disposable Craft site.
+
+## Upgrade notes — 1.0.1
+
+- Rejects unsafe CTA URLs and recognizes browser-written dismissal cookies with cookie validation enabled or disabled.
+- Avoids loading every entry into memory when selecting a popup.
+- Fixes default setup for Craft 4 field groups and Craft 5 entry types, and uses the native custom-field layout constructor on both versions.
+- Setup reports settings-save failures and missing entry types. If setup fails partway, successfully created fields/types are preserved and reused on retry; it is not an atomic operation.
+
+No schema migration is required. Existing settings and content are retained. Review any CTA links using unsupported schemes. If default setup previously failed, rerun **Create default section + fields** in development and deploy the resulting project config normally. The CP setup and preview actions require the `settings` permission and CSRF-protected POST requests.
 
 ## Events
 

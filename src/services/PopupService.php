@@ -2,12 +2,14 @@
 
 namespace arifje\craftpopuppromoter\services;
 
+use arifje\craftpopuppromoter\helpers\Url;
 use arifje\craftpopuppromoter\models\Settings;
 use arifje\craftpopuppromoter\Plugin;
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\elements\Asset;
+use craft\elements\db\EntryQuery;
 use craft\elements\Entry;
 use craft\models\Section;
 use yii\base\Component;
@@ -161,12 +163,33 @@ class PopupService extends Component
     private function pickEntry(Settings $settings, bool $respectDismissalCookies): ?Entry
     {
         try {
-            $entries = Entry::find()
+            $query = $this->createEntryQuery()
                 ->section($settings->sectionHandle)
                 ->siteId(Craft::$app->getSites()->getCurrentSite()->id)
                 ->status('live')
-                ->limit(null)
-                ->all();
+                ->limit(null);
+
+            // Randomize lightweight IDs, then hydrate only a bounded batch at a time.
+            $ids = $query->ids();
+            shuffle($ids);
+
+            for ($offset = 0, $count = count($ids); $offset < $count; $offset += 50) {
+                $entries = (clone $query)
+                    ->id(array_slice($ids, $offset, 50))
+                    ->fixedOrder(true)
+                    ->limit(50)
+                    ->all();
+
+                foreach ($entries as $entry) {
+                    if (
+                        $entry instanceof Entry
+                        && $this->entryAllowsPopup($entry, $settings)
+                        && (!$respectDismissalCookies || !$this->hasDismissalCookie($entry, $settings))
+                    ) {
+                        return $entry;
+                    }
+                }
+            }
         } catch (\Throwable $exception) {
             Craft::warning(
                 sprintf('Could not query popup entries: %s', $exception->getMessage()),
@@ -176,23 +199,12 @@ class PopupService extends Component
             return null;
         }
 
-        if (!$entries) {
-            return null;
-        }
-
-        shuffle($entries);
-
-        foreach ($entries as $entry) {
-            if (
-                $entry instanceof Entry
-                && $this->entryAllowsPopup($entry, $settings)
-                && (!$respectDismissalCookies || !$this->hasDismissalCookie($entry, $settings))
-            ) {
-                return $entry;
-            }
-        }
-
         return null;
+    }
+
+    protected function createEntryQuery(): EntryQuery
+    {
+        return Entry::find();
     }
 
     private function entryAllowsPopup(Entry $entry, Settings $settings): bool
@@ -217,7 +229,10 @@ class PopupService extends Component
 
     private function hasDismissalCookie(Entry $entry, Settings $settings): bool
     {
-        return Craft::$app->getRequest()->getCookies()->getValue($this->cookieName($entry, $settings)) !== null;
+        $request = Craft::$app->getRequest();
+        $cookies = $request->enableCookieValidation ? $request->getRawCookies() : $request->getCookies();
+
+        return $cookies->getValue($this->cookieName($entry, $settings)) !== null;
     }
 
     private function cookieName(Entry $entry, Settings $settings): string
@@ -317,17 +332,17 @@ class PopupService extends Component
         $value = $this->fieldValue($entry, $handle);
 
         if ($value instanceof ElementInterface && method_exists($value, 'getUrl')) {
-            return (string)$value->getUrl();
+            return Url::safeCta((string)$value->getUrl());
         }
 
         if (is_object($value) && method_exists($value, 'one')) {
             $element = $value->one();
             if ($element instanceof ElementInterface && method_exists($element, 'getUrl')) {
-                return (string)$element->getUrl();
+                return Url::safeCta((string)$element->getUrl());
             }
         }
 
-        return $this->normalizeString($value);
+        return Url::safeCta($this->normalizeString($value));
     }
 
     private function stringFieldValue(Entry $entry, string $handle): string

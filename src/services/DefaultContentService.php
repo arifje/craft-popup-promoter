@@ -4,16 +4,19 @@ namespace arifje\craftpopuppromoter\services;
 
 use arifje\craftpopuppromoter\Plugin;
 use Craft;
+use craft\base\FieldInterface;
 use craft\elements\Entry;
 use craft\fieldlayoutelements\CustomField;
+use craft\fieldlayoutelements\entries\EntryTitleField;
 use craft\fields\Assets;
 use craft\fields\Lightswitch;
 use craft\fields\PlainText;
+use craft\models\EntryType;
+use craft\models\FieldGroup;
 use craft\models\FieldLayout;
 use craft\models\FieldLayoutTab;
 use craft\models\Section;
 use craft\models\Section_SiteSettings;
-use craft\base\FieldInterface;
 use yii\base\Component;
 use yii\base\Exception;
 
@@ -39,7 +42,9 @@ class DefaultContentService extends Component
             'defaultVariant' => 'center',
         ];
 
-        Craft::$app->getPlugins()->savePluginSettings(Plugin::getInstance(), $settings);
+        if (!Craft::$app->getPlugins()->savePluginSettings(Plugin::getInstance(), $settings)) {
+            throw new Exception(Craft::t('craft-popup-promoter', 'The popup content model is ready, but its plugin settings could not be saved. Check the settings and retry setup.'));
+        }
 
         return [
             'section' => $section,
@@ -83,6 +88,29 @@ class DefaultContentService extends Component
             'handle' => $handle,
         ], $config));
 
+        // Craft 4 requires global fields to belong to a group; Craft 5 removed groups.
+        $fieldsService = Craft::$app->getFields();
+        if (method_exists($fieldsService, 'getAllGroups')) {
+            $group = null;
+            foreach ($fieldsService->getAllGroups() as $existingGroup) {
+                if ($existingGroup->name === 'Popup Promoter') {
+                    $group = $existingGroup;
+                    break;
+                }
+            }
+
+            if (!$group) {
+                $group = new FieldGroup(['name' => 'Popup Promoter']);
+                if (!$fieldsService->saveGroup($group)) {
+                    throw new Exception(Craft::t('craft-popup-promoter', 'Could not save popup field group: {errors}', [
+                        'errors' => implode(', ', $group->getErrorSummary(true)),
+                    ]));
+                }
+            }
+
+            $field->groupId = $group->id;
+        }
+
         if (!Craft::$app->getFields()->saveField($field)) {
             throw new Exception(sprintf(
                 'Could not save field "%s": %s',
@@ -121,6 +149,29 @@ class DefaultContentService extends Component
             'siteSettings' => $siteSettings,
         ]);
 
+        // Craft 5 entry types are global and must exist before a section is saved.
+        // Reuse the dedicated type when retrying a partially completed setup.
+        if (method_exists($sectionsService, 'getEntryTypeByHandle')) {
+            $entryType = $sectionsService->getEntryTypeByHandle('popupPromoter');
+            if (!$entryType) {
+                $entryType = new EntryType([
+                    'name' => 'Popup Promoter',
+                    'handle' => 'popupPromoter',
+                ]);
+                $layout = $entryType->getFieldLayout();
+                $tab = new FieldLayoutTab(['name' => 'Content', 'layout' => $layout]);
+                $tab->setElements([new EntryTitleField()]);
+                $layout->setTabs([$tab]);
+                if (!$sectionsService->saveEntryType($entryType)) {
+                    throw new Exception(Craft::t('craft-popup-promoter', 'Could not save popup entry type: {errors}', [
+                        'errors' => implode(', ', $entryType->getErrorSummary(true)),
+                    ]));
+                }
+            }
+
+            $section->setEntryTypes([$entryType]);
+        }
+
         if (!$sectionsService->saveSection($section)) {
             throw new Exception(sprintf(
                 'Could not save section "%s": %s',
@@ -141,7 +192,7 @@ class DefaultContentService extends Component
         $entryType = reset($entryTypes);
 
         if (!$entryType) {
-            return;
+            throw new Exception(Craft::t('craft-popup-promoter', 'The popup section has no entry type. Assign an entry type and retry setup.'));
         }
 
         $fieldLayout = $entryType->getFieldLayout() ?: new FieldLayout([
@@ -160,9 +211,7 @@ class DefaultContentService extends Component
         $elements = [];
         foreach ($fields as $field) {
             if (!isset($existingFieldUids[$field->uid])) {
-                $elements[] = new CustomField([
-                    'fieldUid' => $field->uid,
-                ]);
+                $elements[] = new CustomField($field);
             }
         }
 
